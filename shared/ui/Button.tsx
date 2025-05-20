@@ -15,7 +15,7 @@ export default function LongButton({ title, onPress, loading }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: Colors.palette.purple[500],
+    backgroundColor: Colors.purple[500],
     height: 50,
     borderRadius: 8,
     justifyContent: "center",
