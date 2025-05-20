@@ -39,4 +39,3 @@ export function IconSymbol({
   weight?: SymbolWeight;
 }) {
   return <Feather color={color} size={size} name={MAPPING[name]} style={style} />;
-}
