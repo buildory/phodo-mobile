@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { signOut } from "@/entities/auth/api/signout";
+import { signOut } from "@/entities/auth/api";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { supabase } from "@/shared/lib/supabase";
 
 export const useLogout = () => {
   const [loading, setLoading] = useState(false);
@@ -10,15 +12,27 @@ export const useLogout = () => {
   const logout = async (): Promise<boolean> => {
     setLoading(true);
     try {
-      const { error: supabaseError } = await signOut();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
+      const isGoogle = session?.user?.app_metadata?.provider === "google";
+
+      const { error: supabaseError } = await signOut();
       if (supabaseError) {
         setError(supabaseError.message);
         return false;
-      } else {
-        router.replace("/(tabs)");
-        return true;
       }
+
+      if (isGoogle) {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        if (currentUser) {
+          await GoogleSignin.signOut();
+        }
+      }
+
+      router.replace("/(auth)/login");
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
       return false;
@@ -28,4 +42,4 @@ export const useLogout = () => {
   };
 
   return { logout, loading, error };
-};
+}
