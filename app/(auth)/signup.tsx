@@ -71,6 +71,11 @@ export default function SignUpScreen() {
   };
 
   const handleSendEmail = async () => {
+    if(email.trim() === "") {
+      Alert.alert("오류", "이메일을 입력해주세요.");
+      return;
+    }
+    
     const result = await send(email);
     if (result) {
       Alert.alert("성공", "이메일을 확인해주세요!");
