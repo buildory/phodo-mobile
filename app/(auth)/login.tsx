@@ -75,8 +75,8 @@ const handleLogin = async () => {
 
       <LongButton title={"로그인 하기"} loading={loading} onPress={handleLogin} />
    
-      <View style={styles.signupContainer}>
-        <TouchableOpacity>
+      <View style={styles.signupContainer} >
+        <TouchableOpacity onPress={() => router.push('/(auth)/reset-password')}>
           <Text
             style={[styles.signupLink, { color: isDark ? "#fff" : "#000" }]}
           >
