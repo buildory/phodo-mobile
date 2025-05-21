@@ -15,7 +15,7 @@ import { useUpdateUser } from "@/features/auth/model/useUpdateUser";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import LongButton from "@/shared/ui/Button";
 
-export default function SignUpScreen() {
+export default function resetPasswordScreen() {
   const {
     email: initialEmail,
     access_token,
@@ -38,10 +38,10 @@ export default function SignUpScreen() {
   const { updateUserInfo, error: updateError } = useUpdateUser();
   const { send, error: magicLinkError } = useSendMagicLink({
     defaultRedirectUrl: redirectUrl,
-    defaultType: "signup",
+    defaultType: "reset-password",
   });
 
-  const handleSignup = async () => {
+  const handleResetPassword= async () => {
     if (!email || !password || !passwordCheck) {
       Alert.alert("오류", "이메일과 비밀번호를 모두 입력해주세요.");
       return;
@@ -64,7 +64,7 @@ export default function SignUpScreen() {
 
     if (result) {
       router.replace("/(tabs)");
-      Alert.alert("성공", "회원가입 완료!");
+      Alert.alert("성공", "비밀번호 변경 완료!");
     } else if (updateError) {
       Alert.alert("실패", updateError);
     }
@@ -75,7 +75,6 @@ export default function SignUpScreen() {
       Alert.alert("오류", "이메일을 입력해주세요.");
       return;
     }
-    
     const result = await send(email);
     if (result) {
       Alert.alert("성공", "이메일을 확인해주세요!");
@@ -108,15 +107,15 @@ export default function SignUpScreen() {
         <TouchableOpacity style={styles.loginLink}>
           <IconSymbol size={24} name="chevron.left" color={"#181D27"} />
           <Text style={[styles.loginText, { color: isDark ? "#fff" : "#000" }]}>
-            {"회원가입"}
+            {"비밀번호 찾기"}
           </Text>
         </TouchableOpacity>
       </Link>
       <Text style={[styles.title, { color: isDark ? "#fff" : "#000" }]}>
-        포도에 오신 걸 환영해요
+        비밀번호를 잊으셨나요?
       </Text>
-      <Text style={[styles.subTitle, { color: isDark ? "#fff" : "#000" }]}>
-        시작하려면 아래 정보를 입력해주세요
+      <Text style={[styles.subTitle, { color: isDark ? "#fff" : "#535862" }]}>
+        가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드릴게요
       </Text>
       <View style={styles.inputContainer}>
         <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
@@ -144,14 +143,14 @@ export default function SignUpScreen() {
           </Text>
         ) : (
           <TouchableOpacity onPress={handleSendEmail}>
-            <Text style={styles.sendEmail}>인증 이메일 보내기</Text>
+            <Text style={styles.sendEmail}>재설정 메일 보내기</Text>
           </TouchableOpacity>
         )}
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          비밀번호
+          새 비밀번호
         </Text>
         <TextInput
           style={[
@@ -171,7 +170,7 @@ export default function SignUpScreen() {
 
       <View style={styles.inputContainer}>
         <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          비밀번호 확인
+          새 비밀번호 확인
         </Text>
         <TextInput
           style={[
@@ -189,7 +188,7 @@ export default function SignUpScreen() {
         />
       </View>
 
-      <LongButton title={"시작하기"} loading={signupLoading} onPress={handleSignup} />
+      <LongButton title={"새 비밀번호로 로그인하기"} loading={signupLoading} onPress={handleResetPassword} />
     </SafeAreaView>
   );
 }

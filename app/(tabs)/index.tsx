@@ -11,24 +11,28 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { useLogout } from "@/features/auth/model/useLogout";
 import { getCurrentUser } from "@/entities/uesrs/api";
+import { useAuth } from "@/shared/providers/AuthProvider";
 
 export default function HomeScreen() {
   const isDark = false;
   const { logout, error, loading } = useLogout();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const [userEmail, setUserEmail] = useState<string | undefined>();
 
   useEffect(() => {
-  const fetchUser = async () => {
-    const { data, error } = await getCurrentUser();
-    if (data?.user) {
-      setUserEmail(data.user.email);
-    } else {
-      console.error("유저 정보를 불러오지 못했습니다.", error);
+    if (!authLoading && user) {
+      const fetchUser = async () => {
+        const { data, error } = await getCurrentUser();
+        if (data?.user) {
+          setUserEmail(data.user.email);
+        } else {
+          console.error("유저 정보를 불러오지 못했습니다.", error);
+        }
+      };
+  
+      fetchUser();
     }
-  };
-
-  fetchUser();
-}, []);
+  }, [authLoading, user]);
 
   const handleLogout = async () => {
     const success = await logout();
