@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useLogin } from "@/features/login/model/useLogin";
+import { GoogleLoginButton } from "@/features/login/ui/GoogleLoginButton";
 import LongButton from "@/shared/ui/Button";
 
 export default function LoginScreen() {
@@ -73,9 +74,9 @@ const handleLogin = async () => {
       </View>
 
       <LongButton title={"로그인 하기"} loading={loading} onPress={handleLogin} />
-
-      <View style={styles.signupContainer}>
-        <TouchableOpacity>
+   
+      <View style={styles.signupContainer} >
+        <TouchableOpacity onPress={() => router.push('/(auth)/reset-password')}>
           <Text
             style={[styles.signupLink, { color: isDark ? "#fff" : "#000" }]}
           >
@@ -90,6 +91,7 @@ const handleLogin = async () => {
           </Text>
         </TouchableOpacity>
       </View>
+      <GoogleLoginButton />
     </View>
   );
 }

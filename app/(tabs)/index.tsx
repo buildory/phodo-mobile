@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -10,9 +10,29 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useLogout } from "@/features/auth/model/useLogout";
+import { getCurrentUser } from "@/entities/uesrs/api";
+import { useAuth } from "@/shared/providers/AuthProvider";
+
 export default function HomeScreen() {
   const isDark = false;
   const { logout, error, loading } = useLogout();
+  const { user, loading: authLoading } = useAuth();
+  const [userEmail, setUserEmail] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      const fetchUser = async () => {
+        const { data, error } = await getCurrentUser();
+        if (data?.user) {
+          setUserEmail(data.user.email);
+        } else {
+          console.error("유저 정보를 불러오지 못했습니다.", error);
+        }
+      };
+  
+      fetchUser();
+    }
+  }, [authLoading, user]);
 
   const handleLogout = async () => {
     const success = await logout();
@@ -24,7 +44,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>홈</Text>
-      <Text>앱 버전 0.1.0</Text>
+      <Text>{userEmail}</Text>
       <TouchableOpacity
         style={[
           styles.button,
@@ -47,6 +67,7 @@ export default function HomeScreen() {
           )}
         </View>
       </TouchableOpacity>
+      <Text>앱 버전 0.1.0</Text>
     </SafeAreaView>
   );
 }
