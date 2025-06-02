@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  View,
   SafeAreaView,
-  TextInput,
   Alert,
   Text,
   StyleSheet,
@@ -14,6 +12,13 @@ import { useSetSession } from "@/features/auth/model/useSetSession";
 import { useUpdateUser } from "@/features/auth/model/useUpdateUser";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import LongButton from "@/shared/ui/Button";
+import { useToast } from "@/shared/hooks/useToast";
+import { useFormValidator } from "@/shared/hooks/useFormValidator";
+import ValidatedInput from "@/shared/ui/ValidatedInput";
+import { validateSignup } from "@/features/auth/lib/validate";
+import { getUserByEmail } from "@/entities/uesrs/api/getUserByEmail";
+
+const TIMER_DURATION = 300;
 
 export default function SignUpScreen() {
   const {
@@ -25,13 +30,18 @@ export default function SignUpScreen() {
   const [isVerified, setIsVerified] = useState(false);
   const hasPreFilledEmail =
     typeof initialEmail === "string" && initialEmail.length > 0;
-  const [email, setEmail] = useState(hasPreFilledEmail ? initialEmail : "");
-  const [password, setPassword] = useState("");
-  const [passwordCheck, setPasswordCheck] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
+  const toast = useToast();
   const router = useRouter();
   const isDark = false;
   const redirectUrl = process.env.EXPO_PUBLIC_REDIRECT_URL!
+    const {
+      values,
+      setValue,
+      errors,
+      setErrors,
+      validate,
+    } = useFormValidator({ email: hasPreFilledEmail ? initialEmail : "", password: "", passwordConfirm: "" }, validateSignup);
 
   
   const { setAuthSession, success } = useSetSession();
@@ -42,45 +52,45 @@ export default function SignUpScreen() {
   });
 
   const handleSignup = async () => {
-    if (!email || !password || !passwordCheck) {
-      Alert.alert("오류", "이메일과 비밀번호를 모두 입력해주세요.");
-      return;
-    }
-
-    if (password !== passwordCheck) {
-      Alert.alert("오류", "비밀번호가 달라요");
-      return;
-    }
+    if (!validate()) return;
 
     if (!isVerified) {
-      Alert.alert(
-        "이메일 인증 필요",
-        "입력하신 이메일로 인증 링크를 먼저 확인해주세요."
-      );
+      setErrors((prev) => ({ ...prev, email: "입력하신 이메일로 인증 링크를 먼저 확인해주세요." }));
       return;
     }
 
-    const result = await updateUserInfo({ password });
+    const result = await updateUserInfo({ password: values.password });
 
     if (result) {
       router.replace("/(tabs)");
-      Alert.alert("성공", "회원가입 완료!");
     } else if (updateError) {
-      Alert.alert("실패", updateError);
+      toast.showError("회원가입에 실패했어요", "잠시 후 다시 시도해주세요.");
     }
   };
 
   const handleSendEmail = async () => {
-    if(email.trim() === "") {
-      Alert.alert("오류", "이메일을 입력해주세요.");
+    if (!values.email.trim()) {
+      setErrors((prev) => ({ ...prev, email: "이메일을 입력해주세요." }));
+      return;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      setErrors((prev) => ({ ...prev, email: "유효한 이메일 주소를 입력해주세요." }));
       return;
     }
-    
-    const result = await send(email);
-    if (result) {
-      Alert.alert("성공", "이메일을 확인해주세요!");
+
+    const { data } = await getUserByEmail(values.email);
+
+    if (data) {
+      setErrors((prev) => ({ ...prev, email: "이미 가입된 이메일입니다." }));
+      return;
+    }
+
+    const sent = await send(values.email);
+
+    if (sent) {
+      toast.showSuccess("인증 이메일 발송 완료", "이메일을 확인해주세요!");
+      setTimeLeft(TIMER_DURATION);
     } else if (magicLinkError) {
-      Alert.alert("실패", magicLinkError);
+      toast.showError("이메일 전송 실패", "잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -115,79 +125,55 @@ export default function SignUpScreen() {
       <Text style={[styles.title, { color: isDark ? "#fff" : "#000" }]}>
         포도에 오신 걸 환영해요
       </Text>
-      <Text style={[styles.subTitle, { color: isDark ? "#fff" : "#000" }]}>
+      <Text style={[styles.subTitle, { color: isDark ? "#fff" : "#535862" }]}>
         시작하려면 아래 정보를 입력해주세요
       </Text>
-      <View style={styles.inputContainer}>
-        <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          이메일
+        <ValidatedInput
+        label="이메일"
+        placeholder="이메일을 입력해주세요"
+        value={values.email}
+        onChangeText={(text) => setValue("email", text)}
+        error={errors.email}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      {isVerified ? (
+        <Text style={{ marginTop: 8, color: "#12b76a" }}>
+          인증을 완료했어요
         </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? "#333" : "#f5f5f5",
-              color: isDark ? "#fff" : "#000",
-            },
-          ]}
-          onChangeText={setEmail}
-          value={email}
-          editable={!hasPreFilledEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholder="이메일을 입력해주세요"
-          placeholderTextColor={isDark ? "#999" : "#666"}
-        />
-        {isVerified ? (
-          <Text style={{ marginTop: 8, color: "#12b76a" }}>
-            인증을 완료했어요
+      ) : timeLeft > 0 ? (
+        <>
+          <TouchableOpacity onPress={handleSendEmail} disabled={true}>
+            <Text style={{textAlign: "center", alignSelf:'flex-end' }}>
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
           </Text>
-        ) : (
-          <TouchableOpacity onPress={handleSendEmail}>
-            <Text style={styles.sendEmail}>인증 이메일 보내기</Text>
+            <Text style={[styles.sendEmail, { opacity: 0.5 }]}>인증 이메일 보내기</Text>
           </TouchableOpacity>
-        )}
-      </View>
-
-      <View style={styles.inputContainer}>
-        <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          비밀번호
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? "#333" : "#f5f5f5",
-              color: isDark ? "#fff" : "#000",
-            },
-          ]}
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry
-          placeholder="비밀번호를 입력해주세요"
-          placeholderTextColor={isDark ? "#999" : "#666"}
-        />
-      </View>
-
-      <View style={styles.inputContainer}>
-        <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          비밀번호 확인
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? "#333" : "#f5f5f5",
-              color: isDark ? "#fff" : "#000",
-            },
-          ]}
-          onChangeText={setPasswordCheck}
-          value={passwordCheck}
-          secureTextEntry
-          placeholder="비밀번호를 입력해주세요"
-          placeholderTextColor={isDark ? "#999" : "#666"}
-        />
-      </View>
+        </>
+      ) : (
+        <TouchableOpacity onPress={handleSendEmail}>
+          <Text style={styles.sendEmail}>인증 이메일 보내기</Text>
+        </TouchableOpacity>
+      )}
+      <ValidatedInput
+        label="비밀번호"
+        placeholder="비밀번호를 입력해주세요"
+        value={values.password}
+        onChangeText={(text) => setValue("password", text)}
+        secureTextEntry
+        error={errors.password}
+      />
+      <Text style={{color: '#535862', marginBottom: 8, fontSize: 12}}>
+        비밀번호는 8-16자리의 영문 대소문자, 숫자, 특수문자를 조합하여 설정해주세요.
+      </Text>
+      <ValidatedInput
+        label="비밀번호 확인"
+        placeholder="비밀번호를 입력해주세요"
+        value={values.passwordConfirm}
+        onChangeText={(text) => setValue("passwordConfirm", text)}
+        secureTextEntry
+        error={errors.passwordConfirm}
+      />
 
       <LongButton title={"시작하기"} loading={signupLoading} onPress={handleSignup} />
     </SafeAreaView>
