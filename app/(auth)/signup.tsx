@@ -210,32 +210,6 @@ const styles = StyleSheet.create({
     fontWeight: "medium",
     marginBottom: 30,
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  input: {
-    height: 50,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   loginLink: {
     flexDirection: "row",
     paddingVertical: 12,
