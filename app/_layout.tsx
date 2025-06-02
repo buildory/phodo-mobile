@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/shared/providers/AuthProvider';
+import { ToastProvider } from '@/shared/providers/ToastProvider';
 import { useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -60,6 +61,7 @@ function InnerLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Slot />
+      <ToastProvider />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

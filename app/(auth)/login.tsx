@@ -1,91 +1,81 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useLogin } from "@/features/login/model/useLogin";
+import { validateLogin } from "@/features/login/lib/validate";
 import { GoogleLoginButton } from "@/features/login/ui/GoogleLoginButton";
+import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import LongButton from "@/shared/ui/Button";
+import ValidatedInput from "@/shared/ui/ValidatedInput";
+import { useToast } from "@/shared/hooks/useToast";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    values,
+    setValue,
+    errors,
+    validate,
+  } = useFormValidator({ email: "", password: "" }, validateLogin);
   const router = useRouter();
-  const {login, loading, error} = useLogin();
-  const isDark = false;
+  const { login, loading } = useLogin();
+  const toast = useToast();
 
-const handleLogin = async () => {
-  const success = await login(email, password);
-  if (!success && error) {
-    Alert.alert("로그인 오류", error);
-  }
-};
+  const handleLogin = async () => {
+    if (!validate()) return;
+    const {success, message} = await login(values.email, values.password);
+   
+    if (!success) {
+      toast.showError("로그인 실패", message ?? "알 수 없는 오류입니다.");
+    }
+  };
+
   return (
     <View
-      style={[styles.container, { backgroundColor: isDark ? "#000" : "#fff" }]}
+      style={[styles.container, { backgroundColor: "#fff" }]}
     >
-      <Text style={[styles.title, { color: isDark ? "#fff" : "#000" }]}>
+      <Text style={[styles.title, { color: "#000" }]}>
         포도 (Phodo)
       </Text>
 
-      <View style={styles.inputContainer}>
-        <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          이메일
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? "#333" : "#f5f5f5",
-              color: isDark ? "#fff" : "#000",
-            },
-          ]}
-          onChangeText={setEmail}
-          value={email}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholder="이메일을 입력해주세요"
-          placeholderTextColor={isDark ? "#999" : "#666"}
-        />
-      </View>
+      <ValidatedInput
+        label="이메일"
+        placeholder="이메일을 입력해주세요"
+        value={values.email}
+        onChangeText={(text) => setValue("email", text)}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        error={errors.email}
+      />
+      <ValidatedInput
+        label="비밀번호"
+        placeholder="비밀번호를 입력해주세요"
+        value={values.password}
+        onChangeText={(text) => setValue("password", text)}
+        secureTextEntry
+        error={errors.password}
+      />
+      <LongButton
+        title={"로그인 하기"}
+        loading={loading}
+        onPress={handleLogin}
+      />
 
-      <View style={styles.inputContainer}>
-        <Text style={[styles.label, { color: isDark ? "#fff" : "#000" }]}>
-          비밀번호
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? "#333" : "#f5f5f5",
-              color: isDark ? "#fff" : "#000",
-            },
-          ]}
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry
-          placeholder="비밀번호를 입력해주세요"
-        />
-      </View>
-
-      <LongButton title={"로그인 하기"} loading={loading} onPress={handleLogin} />
-   
       <View style={styles.signupContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/(auth)/reset-password")}>
           <Text
-            style={[styles.signupLink, { color: isDark ? "#fff" : "#000" }]}
+            style={[styles.signupLink, { color: "#000" }]}
           >
             비밀번호 찾기
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+        <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text
-            style={[styles.signupLink, { color: isDark ? "#fff" : "#6172f3" }]}
+            style={[styles.signupLink, { color: "#6172f3" }]}
           >
             회원가입
           </Text>
@@ -108,52 +98,10 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: "center",
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  input: {
-    height: 50,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  googleButton: {
-    backgroundColor: "#DB4437",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  googleIcon: {
-    marginRight: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   signupContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 20,
-  },
-  signupText: {
-    fontSize: 16,
-    color: "#333",
   },
   signupLink: {
     fontSize: 14,
