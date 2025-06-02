@@ -27,6 +27,7 @@ export default function SignUpScreen() {
     refresh_token,
   } = useLocalSearchParams();
 
+  const [timeLeft, setTimeLeft] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
   const hasPreFilledEmail =
     typeof initialEmail === "string" && initialEmail.length > 0;
@@ -109,6 +110,24 @@ export default function SignUpScreen() {
       setIsVerified(true);
     }
   }, [success]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+  
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsVerified(false);
+          toast.showInfo("시간 초과", "이메일 인증 시간이 만료되었습니다.");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [timeLeft]);
 
   return (
     <SafeAreaView
