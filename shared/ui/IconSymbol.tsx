@@ -12,7 +12,17 @@ const MAPPING = {
   'house.fill': 'home',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'chevron.left': 'chevron-left'
+  'chevron.left': 'chevron-left',
+  'magnifyingglass': 'search',
+  'gearshape': 'settings',
+  'plus': 'plus',
+  'mappin': 'map-pin',
+  'crosshair': 'crosshair',
+  'copy': 'copy',
+  'users': 'users',
+  'hash': 'hash',
+  'check': 'check',
+  'menu': 'menu'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
