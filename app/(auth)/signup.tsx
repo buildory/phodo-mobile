@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { useRouter, Link, useLocalSearchParams } from "expo-router";
 import { useSendMagicLink } from "@/features/auth/model/useSendMagicLink";
@@ -18,7 +19,8 @@ import ValidatedInput from "@/shared/ui/ValidatedInput";
 import { validateSignup } from "@/features/auth/lib/validate";
 import { getUserByEmail } from "@/entities/uesrs/api/getUserByEmail";
 
-const TIMER_DURATION = 300;
+const TIMER_DURATION = 60 * 2;
+type EmailVerificationStatus = "initial" | "sent" | "expired" | "verified";
 
 export default function SignUpScreen() {
   const {
@@ -28,23 +30,33 @@ export default function SignUpScreen() {
   } = useLocalSearchParams();
 
   const [timeLeft, setTimeLeft] = useState(0);
+  const [emailStatus, setEmailStatus] =
+    useState<EmailVerificationStatus>("initial");
   const [isVerified, setIsVerified] = useState(false);
   const hasPreFilledEmail =
     typeof initialEmail === "string" && initialEmail.length > 0;
   const [signupLoading, setSignupLoading] = useState(false);
+  const [sendMailLoading, setSendMailLoading] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const isDark = false;
-  const redirectUrl = process.env.EXPO_PUBLIC_REDIRECT_URL!
-    const {
-      values,
-      setValue,
-      errors,
-      setErrors,
-      validate,
-    } = useFormValidator({ email: hasPreFilledEmail ? initialEmail : "", password: "", passwordConfirm: "" }, validateSignup);
+  const redirectUrl = process.env.EXPO_PUBLIC_REDIRECT_URL!;
+  const { values, setValue, errors, setErrors, validate } = useFormValidator(
+    {
+      email: hasPreFilledEmail ? initialEmail : "",
+      password: "",
+      passwordConfirm: "",
+    },
+    validateSignup
+  );
 
-  
+  const isFormValid =
+    values.email &&
+    values.password &&
+    values.passwordConfirm &&
+    !errors.email &&
+    !errors.password &&
+    !errors.passwordConfirm;
   const { setAuthSession, success } = useSetSession();
   const { updateUserInfo, error: updateError } = useUpdateUser();
   const { send, error: magicLinkError } = useSendMagicLink({
@@ -56,10 +68,15 @@ export default function SignUpScreen() {
     if (!validate()) return;
 
     if (!isVerified) {
-      setErrors((prev) => ({ ...prev, email: "입력하신 이메일로 인증 링크를 먼저 확인해주세요." }));
+      setErrors((prev) => ({
+        ...prev,
+        email: "입력하신 이메일로 인증 링크를 먼저 확인해주세요.",
+      }));
       return;
     }
-
+    
+    setSignupLoading(true);
+    
     const result = await updateUserInfo({ password: values.password });
 
     if (result) {
@@ -67,14 +84,21 @@ export default function SignUpScreen() {
     } else if (updateError) {
       toast.showError("회원가입에 실패했어요", "잠시 후 다시 시도해주세요.");
     }
+
+    setSignupLoading(false);
   };
 
   const handleSendEmail = async () => {
+    setErrors((prev) => ({ ...prev, email: undefined }));
+
     if (!values.email.trim()) {
       setErrors((prev) => ({ ...prev, email: "이메일을 입력해주세요." }));
       return;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-      setErrors((prev) => ({ ...prev, email: "유효한 이메일 주소를 입력해주세요." }));
+      setErrors((prev) => ({
+        ...prev,
+        email: "유효한 이메일 주소를 입력해주세요.",
+      }));
       return;
     }
 
@@ -85,49 +109,62 @@ export default function SignUpScreen() {
       return;
     }
 
+
+    setSendMailLoading(true);
+
     const sent = await send(values.email);
 
     if (sent) {
-      toast.showSuccess("인증 이메일 발송 완료", "이메일을 확인해주세요!");
       setTimeLeft(TIMER_DURATION);
+      setEmailStatus("sent");
     } else if (magicLinkError) {
       toast.showError("이메일 전송 실패", "잠시 후 다시 시도해주세요.");
     }
+
+    setSendMailLoading(false);
   };
 
   useEffect(() => {
     if (access_token && refresh_token) {
-      setAuthSession(access_token as string, refresh_token as string).then((ok) => {
-        if (!ok) {
-          Alert.alert("오류", "세션 설정에 실패했습니다.");
+      setAuthSession(access_token as string, refresh_token as string).then(
+        (ok) => {
+          if (!ok) {
+            Alert.alert("오류", "세션 설정에 실패했습니다.");
+          }
         }
-      });
+      );
     }
   }, [access_token, refresh_token]);
-  
+
   useEffect(() => {
     if (success) {
+      setEmailStatus("verified");
       setIsVerified(true);
     }
   }, [success]);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
-  
+
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setIsVerified(false);
-          toast.showInfo("시간 초과", "이메일 인증 시간이 만료되었습니다.");
+          setEmailStatus("expired");
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  
+
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  const handleReset = () => {
+    setEmailStatus("initial");
+    setTimeLeft(0);
+    setErrors((prev) => ({ ...prev, email: undefined }));
+  };
 
   return (
     <SafeAreaView
@@ -147,7 +184,7 @@ export default function SignUpScreen() {
       <Text style={[styles.subTitle, { color: isDark ? "#fff" : "#535862" }]}>
         시작하려면 아래 정보를 입력해주세요
       </Text>
-        <ValidatedInput
+      <ValidatedInput
         label="이메일"
         placeholder="이메일을 입력해주세요"
         value={values.email}
@@ -155,25 +192,90 @@ export default function SignUpScreen() {
         error={errors.email}
         autoCapitalize="none"
         keyboardType="email-address"
+        editable={emailStatus !== "verified"}
       />
-      {isVerified ? (
-        <Text style={{ marginTop: 8, color: "#12b76a" }}>
-          인증을 완료했어요
-        </Text>
-      ) : timeLeft > 0 ? (
-        <>
-          <TouchableOpacity onPress={handleSendEmail} disabled={true}>
-            <Text style={{textAlign: "center", alignSelf:'flex-end' }}>
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
-          </Text>
-            <Text style={[styles.sendEmail, { opacity: 0.5 }]}>인증 이메일 보내기</Text>
+      <View style={{ marginBottom: 8 }}>
+        {emailStatus === "verified" && (
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#12b76a", textAlign: "center" }}>
+              인증을 완료했어요
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                marginTop: 4,
+              }}
+            >
+              <Text onPress={handleReset} style={{ color: "#535862" }}>
+                재입력
+              </Text>
+            </View>
+          </View>
+        )}
+        {emailStatus === "expired" && (
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#f44336",
+                textAlign: "center",
+              }}
+            >
+              이메일 인증 유효 시간이 만료되었어요
+            </Text>
+          </View>
+        )}
+        {emailStatus === "sent" && (
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#535862",
+                textAlign: "center",
+              }}
+            >
+              인증 이메일을 보냈어요
+            </Text>
+            <Text style={{ textAlign: "center", color: "#000" }}>
+              남은 시간: {Math.floor(timeLeft / 60)}:
+              {(timeLeft % 60).toString().padStart(2, "0")}
+            </Text>
+          </View>
+        )}
+      </View>
+      {emailStatus !== "verified" && (
+          <TouchableOpacity disabled={emailStatus === "sent" || sendMailLoading} onPress={handleSendEmail}>
+            <Text
+              disabled={emailStatus === "sent" || sendMailLoading}
+              style={[
+                styles.sendEmail,
+                emailStatus === "sent" && { color: "#535862" },
+              ]}
+            >
+              인증 이메일 보내기
+            </Text>
           </TouchableOpacity>
-        </>
-      ) : (
-        <TouchableOpacity onPress={handleSendEmail}>
-          <Text style={styles.sendEmail}>인증 이메일 보내기</Text>
-        </TouchableOpacity>
-      )}
+        )}
       <ValidatedInput
         label="비밀번호"
         placeholder="비밀번호를 입력해주세요"
@@ -182,8 +284,9 @@ export default function SignUpScreen() {
         secureTextEntry
         error={errors.password}
       />
-      <Text style={{color: '#535862', marginBottom: 8, fontSize: 12}}>
-        비밀번호는 8-16자리의 영문 대소문자, 숫자, 특수문자를 조합하여 설정해주세요.
+      <Text style={{ color: "#535862", marginBottom: 8, fontSize: 12 }}>
+        비밀번호는 8-16자리의 영문 대소문자, 숫자, 특수문자를 조합하여
+        설정해주세요.
       </Text>
       <ValidatedInput
         label="비밀번호 확인"
@@ -194,7 +297,12 @@ export default function SignUpScreen() {
         error={errors.passwordConfirm}
       />
 
-      <LongButton title={"시작하기"} loading={signupLoading} onPress={handleSignup} />
+      <LongButton
+        title={"시작하기"}
+        loading={signupLoading}
+        onPress={handleSignup}
+        disabled={!isFormValid || !isVerified}
+      />
     </SafeAreaView>
   );
 }
