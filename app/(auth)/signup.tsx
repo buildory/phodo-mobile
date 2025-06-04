@@ -19,7 +19,7 @@ import ValidatedInput from "@/shared/ui/ValidatedInput";
 import { validateSignup } from "@/features/auth/lib/validate";
 import { getUserByEmail } from "@/entities/uesrs/api/getUserByEmail";
 
-const TIMER_DURATION = 60 * 2;
+const TIMER_DURATION = 60 * 10;
 type EmailVerificationStatus = "initial" | "sent" | "expired" | "verified";
 
 export default function SignUpScreen() {

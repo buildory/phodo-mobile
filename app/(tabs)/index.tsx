@@ -27,6 +27,7 @@ import {
   getMarkerImage,
 } from "@/features/projects/lib";
 import { getAddress } from "@/features/projects/api/getAddress";
+import { useAuth } from "@/shared/providers/AuthProvider";
 import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
 import { useMapCameraInit } from "@/features/projects/model/useMapCameraInit";
 export default function SearchScreen() {
@@ -54,14 +55,18 @@ export default function SearchScreen() {
   const listSheetRef = useRef<ProjectListSheetRef>(null);
   const detailSheetRef = useRef<ProjectDetailSheetRef>(null);
 
-  const handleCameraIdle = (e) => {
-    if (timer.current) clearTimeout(timer.current);
+const handleCameraIdle = (e) => {
+  if (timer.current) clearTimeout(timer.current);
 
-    timer.current = setTimeout(async () => {
+  timer.current = setTimeout(async () => {
+    try {
       const { address } = await getAddress(e.latitude, e.longitude);
       setAddress(address);
-    }, 1500);
-  };
+    } catch (error) {
+      setAddress("주소를 찾을 수 없습니다.");
+    }
+  }, 1500);
+};
 
   useEffect(() => {
     if (!projects || !myLocation) return;
