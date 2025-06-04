@@ -55,14 +55,18 @@ export default function SearchScreen() {
   const listSheetRef = useRef<ProjectListSheetRef>(null);
   const detailSheetRef = useRef<ProjectDetailSheetRef>(null);
 
-  const handleCameraIdle = (e) => {
-    if (timer.current) clearTimeout(timer.current);
+const handleCameraIdle = (e) => {
+  if (timer.current) clearTimeout(timer.current);
 
-    timer.current = setTimeout(async () => {
+  timer.current = setTimeout(async () => {
+    try {
       const { address } = await getAddress(e.latitude, e.longitude);
       setAddress(address);
-    }, 1500);
-  };
+    } catch (error) {
+      setAddress("주소를 찾을 수 없습니다.");
+    }
+  }, 1500);
+};
 
   useEffect(() => {
     if (!projects || !myLocation) return;
