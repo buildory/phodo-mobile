@@ -1,13 +1,13 @@
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator  } from "react-native";
 import { Colors } from '@/shared/styles/Colors';
 
-export default function LongButton({ title, onPress, loading }) {
+export default function LongButton({ title, onPress, loading, disabled = false }) {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
-      style={[styles.button, { opacity: loading ? 0.6 : 1 }]}
+      style={[styles.button, { opacity: loading ? 0.6 : 1 }, disabled && { backgroundColor: '#e9eaeb' }]}
       onPress={onPress}
-      disabled={loading}
+      disabled={disabled}
     >
       {loading ? (
         <ActivityIndicator color="#fff" />

@@ -21,6 +21,7 @@ export default function ValidatedInput({
         </Text>
       )}
       <TextInput
+        editable={props.editable ? props.editable : true}
         style={[
           styles.input,
           {

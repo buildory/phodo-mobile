@@ -1,74 +1,200 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  Image,
+  Pressable,
+  InteractionManager,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { useLogout } from "@/features/auth/model/useLogout";
-import { getCurrentUser } from "@/entities/uesrs/api";
-import { useAuth } from "@/shared/providers/AuthProvider";
-
-export default function HomeScreen() {
+import { useProjects } from "@/features/projects/model/useProjects";
+import {
+  NaverMapView,
+  NaverMapMarkerOverlay,
+  Camera,
+} from "@mj-studio/react-native-naver-map";
+import ProjectListSheet, {
+  ProjectListSheetRef,
+} from "@/features/projects/ui/ProjectListSheet";
+import ProjectDetailSheet, {
+  ProjectDetailSheetRef,
+} from "@/features/projects/ui/ProjectDetailSheet";
+import { IconSymbol } from "@/shared/ui/IconSymbol";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { getCurrentUserId } from "@/shared/lib/auth";
+import {
+  getDistanceFromLatLonInKm,
+  getMarkerImage,
+} from "@/features/projects/lib";
+import { getAddress } from "@/features/projects/api/getAddress";
+import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
+import { useMapCameraInit } from "@/features/projects/model/useMapCameraInit";
+export default function SearchScreen() {
   const isDark = false;
-  const { logout, error, loading } = useLogout();
-  const { user, loading: authLoading } = useAuth();
-  const [userEmail, setUserEmail] = useState<string | undefined>();
+  const [address, setAddress] = useState("");
+  const [selectedType, setSelectedType] = useState<
+    "photographer" | "model" | null
+  >(null);
+  const [camera, setCamera] = useState<Camera>({
+    latitude: 36.5,
+    longitude: 127.75,
+    zoom: 7,
+  });
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      const fetchUser = async () => {
-        const { data, error } = await getCurrentUser();
-        if (data?.user) {
-          setUserEmail(data.user.email);
-        } else {
-          console.error("유저 정보를 불러오지 못했습니다.", error);
-        }
-      };
-  
-      fetchUser();
-    }
-  }, [authLoading, user]);
+  const myLocation = useWatchLocation();
+  useMapCameraInit(myLocation, setCamera);
 
-  const handleLogout = async () => {
-    const success = await logout();
-    if (!success && error) {
-      Alert.alert("로그인 오류", error);
-    }
+  const [currentUserId, setCurrentUserId] = useState();
+
+  const [projectsWithDistance, setProjectsWithDistance] = useState([]);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const { data: projects } = useProjects(selectedType);
+
+  const timer = useRef<NodeJS.Timeout | null>(null);
+  const listSheetRef = useRef<ProjectListSheetRef>(null);
+  const detailSheetRef = useRef<ProjectDetailSheetRef>(null);
+
+  const handleCameraIdle = (e) => {
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(async () => {
+      const { address } = await getAddress(e.latitude, e.longitude);
+      setAddress(address);
+    }, 1500);
   };
 
+  useEffect(() => {
+    if (!projects || !myLocation) return;
+
+    const updated = projects.map((project) => ({
+      ...project,
+      distance: getDistanceFromLatLonInKm(
+        myLocation.latitude,
+        myLocation.longitude,
+        project.latitude,
+        project.longitude
+      ),
+    }));
+
+    setProjectsWithDistance(updated);
+  }, [projects, myLocation]);
+
+  useEffect(() => {
+    (async () => {
+      const userId = await getCurrentUserId();
+      setCurrentUserId(userId);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (projectsWithDistance.length > 0) {
+      InteractionManager.runAfterInteractions(() => {
+        listSheetRef.current?.open(0);
+      });
+    }
+  }, [projectsWithDistance]);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>홈</Text>
-      <Text>{userEmail}</Text>
-      <TouchableOpacity
-        style={[
-          styles.button,
-          { backgroundColor: isDark ? "#333" : "#f5f5f5" },
-        ]}
-        onPress={handleLogout}
-        disabled={loading}
-      >
-        <View style={styles.buttonContent}>
-          <FontAwesome name="sign-out" size={20} color="#FF3B30" />
-          <Text style={[styles.buttonText, { color: "#FF3B30" }]}>
-            {loading ? "로그아웃 중..." : "로그아웃"}
-          </Text>
-          {loading && (
-            <ActivityIndicator
-              size="small"
-              color="#FF3B30"
-              style={styles.loadingIndicator}
+    <GestureHandlerRootView
+      style={[styles.container, { backgroundColor: isDark ? "#000" : "#fff" }]}
+    >
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+        <View style={styles.topOverlay}>
+          <View style={styles.textBox}>
+            <IconSymbol
+              style={styles.icon}
+              size={14}
+              name="mappin"
+              color={"#717680"}
             />
-          )}
+            <Text style={styles.address} numberOfLines={1} ellipsizeMode="tail">
+              {address}
+            </Text>
+          </View>
+          <Pressable style={styles.gpsButton}>
+            <IconSymbol size={24} name="plus" color={"#ffffff"} />
+          </Pressable>
         </View>
-      </TouchableOpacity>
-      <Text>앱 버전 0.1.0</Text>
-    </SafeAreaView>
+      </View>
+      <NaverMapView
+        style={{ flex: 1 }}
+        camera={camera}
+        onCameraIdle={handleCameraIdle}
+        isShowLocationButton={false}
+        isExtentBoundedInKorea={true}
+        minZoom={6}
+        maxZoom={18}
+      >
+        {projectsWithDistance.map((project) => (
+          <View key={project.id} style={{ borderRadius: 8 }}>
+            <NaverMapMarkerOverlay
+              latitude={project.latitude}
+              longitude={project.longitude}
+              width={40}
+              height={40}
+              image={getMarkerImage(
+                project.pin_display,
+                project.recruit_type,
+                project.user_id === currentUserId
+                  ? "self"
+                  : project.profiles.gender
+              )}
+              onTap={() => {
+                setSelectedProject(project);
+                detailSheetRef.current?.open();
+              }}
+            />
+          </View>
+        ))}
+        {myLocation?.latitude && myLocation?.longitude && (
+          <NaverMapMarkerOverlay
+            latitude={myLocation.latitude}
+            longitude={myLocation.longitude}
+            width={24}
+            height={24}
+            image={require("@/assets/images/markers/my_location_pin.png")}
+          />
+        )}
+      </NaverMapView>
+
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        <View style={styles.pinWrapper}>
+          <Image source={require("@/assets/images/markers/map_pin.png")} />
+        </View>
+      </View>
+
+      <View style={styles.researchWrapper} pointerEvents="box-none">
+        <Pressable onPress={() => listSheetRef.current?.open(1)}>
+          <View style={styles.list}>
+            <IconSymbol name="menu" size={14} color="black" />
+            <Text>목록보기</Text>
+          </View>
+        </Pressable>
+      </View>
+      <Pressable
+        onPress={() => {
+          if (myLocation) {
+            setCamera({
+              latitude: myLocation.latitude,
+              longitude: myLocation.longitude,
+              zoom: camera.zoom + Math.random() * 0.001,
+            });
+          }
+        }}
+        style={styles.currentLocationButton}
+      >
+        <IconSymbol name="crosshair" size={24} color="black" />
+      </Pressable>
+      <ProjectListSheet
+        ref={listSheetRef}
+        projects={projectsWithDistance}
+        selected={selectedType}
+        onSelect={setSelectedType}
+      />
+      {selectedProject && (
+        <ProjectDetailSheet ref={detailSheetRef} project={selectedProject} />
+      )}
+    </GestureHandlerRootView>
   );
 }
 
@@ -76,53 +202,95 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+  },
+  pinWrapper: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
   },
-  contentContainer: {
-    padding: 20,
+  researchWrapper: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    marginBottom: "15%",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
+
+  list: {
+    flexDirection: "row",
+    gap: "6",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    elevation: 3,
+    shadowColor: "#000",
+    borderColor: "#e9eaeb",
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  button: {
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-  },
-  buttonContent: {
+  topOverlay: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    right: 20,
     flexDirection: "row",
     alignItems: "center",
+    zIndex: 10,
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 10,
-  },
-  loadingIndicator: {
-    marginLeft: 10,
-  },
-  infoItem: {
+
+  textBox: {
+    flex: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
+    backgroundColor: "white",
+    borderRadius: 8,
+    height: 40,
+    paddingHorizontal: 12,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  infoLabel: {
+
+  icon: {
+    width: 14,
+    height: 14,
+    marginRight: 8,
+  },
+
+  address: {
+    flex: 1,
     fontSize: 16,
   },
-  infoValue: {
-    fontSize: 16,
+
+  gpsButton: {
+    marginLeft: 10,
+    padding: 8,
+    backgroundColor: "black",
+    borderRadius: 8,
+    elevation: 3,
+  },
+  currentLocationButton: {
+    position: "absolute",
+    right: 13,
+    top: "60%",
+    marginTop: -24,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });

@@ -1,9 +1,9 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { HapticTab } from '@/shared/ui/HapticTab';
-import { IconSymbol } from '@/shared/ui/IconSymbol';
-import{ Colors } from '@/shared/styles/Colors';
+import { Tabs } from "expo-router";
+import React from "react";
+import { Platform } from "react-native";
+import { HapticTab } from "@/shared/ui/HapticTab";
+import { IconSymbol } from "@/shared/ui/IconSymbol";
+import { Colors } from "@/shared/styles/Colors";
 
 export default function TabLayout() {
   return (
@@ -15,16 +15,28 @@ export default function TabLayout() {
         tabBarBackground: undefined,
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute',
+            position: "absolute",
           },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: '홈',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "주변",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="magnifyingglass" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="setting"
+        options={{
+          title: "설정",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="gearshape" color={color} />
+          ),
         }}
       />
     </Tabs>

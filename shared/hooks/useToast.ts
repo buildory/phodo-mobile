@@ -8,6 +8,12 @@ export const useToast = () => {
         text1: title,
         text2: message,
       }),
+    showInfo: (title: string, message?: string) =>
+      Toast.show({
+        type: "info",
+        text1: title,
+        text2: message,
+      }),
     showError: (title: string, message?: string) =>
       Toast.show({
         type: "error",
