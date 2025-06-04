@@ -79,11 +79,11 @@ export default function resetPasswordScreen() {
 
     setResetPasswordLoading(true);
 
-    const result = await updateUserInfo({ password: values.password });
+    const { ok, error } = await updateUserInfo({ password: values.password });
 
-    if (result) {
+    if (ok) {
       router.replace("/(tabs)");
-    } else if (updateError?.includes("New password should be different")) {
+    } else if (error?.includes("New password should be different")) {
       toast.showError("같은 비밀번호로는 변경할 수 없어요", "이전과 다른 비밀번호를 입력해주세요.");
     } else {
       toast.showError("로그인에 실패했어요", "잠시 후 다시 시도해주세요.");
