@@ -1,0 +1,1 @@
+export { registerProjectPaths } from "./openapi";
