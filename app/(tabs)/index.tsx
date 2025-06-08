@@ -7,7 +7,7 @@ import {
   Pressable,
   InteractionManager,
 } from "react-native";
-import { useProjects } from "@/features/projects/model/useProjects";
+import { useProjects } from "@/entities/projects/model";
 import {
   NaverMapView,
   NaverMapMarkerOverlay,
@@ -27,7 +27,6 @@ import {
   getMarkerImage,
 } from "@/features/projects/lib";
 import { getAddress } from "@/features/projects/api/getAddress";
-import { useAuth } from "@/shared/providers/AuthProvider";
 import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
 import { useMapCameraInit } from "@/features/projects/model/useMapCameraInit";
 export default function SearchScreen() {
@@ -49,7 +48,7 @@ export default function SearchScreen() {
 
   const [projectsWithDistance, setProjectsWithDistance] = useState([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
-  const { data: projects } = useProjects(selectedType);
+  const { data: projects } = useProjects({recruitType: selectedType});
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const listSheetRef = useRef<ProjectListSheetRef>(null);

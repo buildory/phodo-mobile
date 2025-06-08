@@ -6,8 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { AuthProvider, useAuth } from '@/shared/providers/AuthProvider';
-import { ToastProvider } from '@/shared/providers/ToastProvider';
+import { AuthProvider, useAuth, ToastProvider, QueryProvider } from '@/shared/providers';
 import { useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -15,9 +14,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <InnerLayout />
-    </AuthProvider>
+    <QueryProvider>
+      <AuthProvider>
+        <InnerLayout />
+      </AuthProvider>
+    </QueryProvider>
   );
 }
 
