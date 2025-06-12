@@ -1,9 +1,10 @@
 import { supabase } from "@/shared/lib/supabase";
+import { Project, ProjectListParams } from "../model";
 
 export const getProjects = async (
-  selected?: "photographer" | "model" | null
-) => {
-  const query = supabase
+  params: ProjectListParams
+): Promise<Project[]> => {
+  let query = supabase
     .from("projects")
     .select(
       `
@@ -29,9 +30,13 @@ export const getProjects = async (
     )
     .order("created_at", { ascending: false });
 
-  if (selected) {
-    return query.eq("recruit_type", selected);
+  if (params.recruitType) {
+    query = query.eq("recruit_type", params.recruitType);
   }
 
-  return query;
+  const { data, error } = await query;
+
+  if (error) throw error;
+
+  return data ?? [];
 };

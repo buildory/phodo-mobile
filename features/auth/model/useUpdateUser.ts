@@ -6,7 +6,9 @@ export const useUpdateUser = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const updateUserInfo = async (payload: UpdateUserPayload): Promise<boolean> => {
+  const updateUserInfo = async (
+    payload: UpdateUserPayload
+  ): Promise<{ ok: boolean; error?: string }> => {
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -15,14 +17,15 @@ export const useUpdateUser = () => {
       const { error } = await updateUser(payload);
       if (error) {
         setError(error.message);
-        return false;
+        return { ok: false, error: error.message };
       } else {
         setSuccess(true);
-        return true;
+        return { ok: true };
       }
     } catch (e: any) {
-      setError(e?.message ?? "알 수 없는 오류");
-      return false;
+      const message = e?.message ?? "알 수 없는 오류";
+      setError(message);
+      return { ok: false, error: message };
     } finally {
       setLoading(false);
     }
@@ -35,3 +38,4 @@ export const useUpdateUser = () => {
     success,
   };
 };
+

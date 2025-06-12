@@ -7,7 +7,7 @@ import {
   Pressable,
   InteractionManager,
 } from "react-native";
-import { useProjects } from "@/features/projects/model/useProjects";
+import { useProjects } from "@/entities/projects/model";
 import {
   NaverMapView,
   NaverMapMarkerOverlay,
@@ -48,20 +48,24 @@ export default function SearchScreen() {
 
   const [projectsWithDistance, setProjectsWithDistance] = useState([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
-  const { data: projects } = useProjects(selectedType);
+  const { data: projects } = useProjects({recruitType: selectedType});
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const listSheetRef = useRef<ProjectListSheetRef>(null);
   const detailSheetRef = useRef<ProjectDetailSheetRef>(null);
 
-  const handleCameraIdle = (e) => {
-    if (timer.current) clearTimeout(timer.current);
+const handleCameraIdle = (e) => {
+  if (timer.current) clearTimeout(timer.current);
 
-    timer.current = setTimeout(async () => {
+  timer.current = setTimeout(async () => {
+    try {
       const { address } = await getAddress(e.latitude, e.longitude);
       setAddress(address);
-    }, 1500);
-  };
+    } catch (error) {
+      setAddress("주소를 찾을 수 없습니다.");
+    }
+  }, 1500);
+};
 
   useEffect(() => {
     if (!projects || !myLocation) return;
