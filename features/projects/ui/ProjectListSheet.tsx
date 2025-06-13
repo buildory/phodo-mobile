@@ -29,6 +29,10 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
       close: () => bottomSheetRef.current?.close(),
     }));
 
+    const handlePressProject = (item) => {
+      console.log(item.id)
+    }
+
     return (
       <BottomSheet
         index={0}
@@ -49,7 +53,7 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
             <FlatList
               data={projects}
               keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => <ProjectCard project={item} />}
+              renderItem={({ item }) => <ProjectCard project={item} onPress={() => handlePressProject(item)}/>}
               contentContainerStyle={styles.flatListContent}
               keyboardShouldPersistTaps="always"
               showsVerticalScrollIndicator={false}
