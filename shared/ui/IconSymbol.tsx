@@ -22,7 +22,9 @@ const MAPPING = {
   'users': 'users',
   'hash': 'hash',
   'check': 'check',
-  'menu': 'menu'
+  'menu': 'menu',
+  'x': 'x',
+  'camera': 'camera'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
