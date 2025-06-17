@@ -19,6 +19,7 @@ import ProjectListSheet, {
 import ProjectDetailSheet, {
   ProjectDetailSheetRef,
 } from "@/features/projects/ui/ProjectDetailSheet";
+import CreateProjectSheet, { CreateProjectSheetRef } from "@/features/projects/ui/CreateProjectSheet";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { getCurrentUserId } from "@/shared/lib/auth";
@@ -29,9 +30,18 @@ import {
 import { getAddress } from "@/features/projects/api/getAddress";
 import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
 import { useMapCameraInit } from "@/features/projects/model/useMapCameraInit";
+import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";  
+
 export default function SearchScreen() {
   const isDark = false;
-  const [address, setAddress] = useState("");
+  const [location, setLocation] = useState({
+    address: '',
+    latitude: 36.5,
+    longitude: 127.75,
+    inputLocation: ''
+
+  })
+  const { setField } = useProjectFormStore();
   const [selectedType, setSelectedType] = useState<
     "photographer" | "model" | null
   >(null);
@@ -41,11 +51,13 @@ export default function SearchScreen() {
     zoom: 7,
   });
 
+
+
   const myLocation = useWatchLocation();
   useMapCameraInit(myLocation, setCamera);
 
   const [currentUserId, setCurrentUserId] = useState();
-
+  const [open, setOpen] = useState(false);
   const [projectsWithDistance, setProjectsWithDistance] = useState([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const { data: projects } = useProjects({recruitType: selectedType});
@@ -53,6 +65,7 @@ export default function SearchScreen() {
   const timer = useRef<NodeJS.Timeout | null>(null);
   const listSheetRef = useRef<ProjectListSheetRef>(null);
   const detailSheetRef = useRef<ProjectDetailSheetRef>(null);
+  const createSheetRef = useRef<CreateProjectSheetRef>(null);
 
 const handleCameraIdle = (e) => {
   if (timer.current) clearTimeout(timer.current);
@@ -60,9 +73,9 @@ const handleCameraIdle = (e) => {
   timer.current = setTimeout(async () => {
     try {
       const { address } = await getAddress(e.latitude, e.longitude);
-      setAddress(address);
+      setLocation((prev) => ({...prev, latitude: e.latitude, longitude: e.longitude, address: address}));
     } catch (error) {
-      setAddress("주소를 찾을 수 없습니다.");
+      setLocation((prev) => ({...prev, address: "주소를 찾을 수 없습니다."}));
     }
   }, 1500);
 };
@@ -112,10 +125,10 @@ const handleCameraIdle = (e) => {
               color={"#717680"}
             />
             <Text style={styles.address} numberOfLines={1} ellipsizeMode="tail">
-              {address}
+              {location.address}
             </Text>
           </View>
-          <Pressable style={styles.gpsButton}>
+          <Pressable onPress={() => createSheetRef.current?.open(0)} style={styles.gpsButton}>
             <IconSymbol size={24} name="plus" color={"#ffffff"} />
           </Pressable>
         </View>
@@ -137,9 +150,9 @@ const handleCameraIdle = (e) => {
               width={40}
               height={40}
               image={getMarkerImage(
-                project.pin_display,
-                project.recruit_type,
-                project.user_id === currentUserId
+                project.pinDisplay,
+                project.recruitType,
+                project.userId === currentUserId
                   ? "self"
                   : project.profiles.gender
               )}
@@ -198,6 +211,7 @@ const handleCameraIdle = (e) => {
       {selectedProject && (
         <ProjectDetailSheet ref={detailSheetRef} project={selectedProject} />
       )}
+      <CreateProjectSheet ref={createSheetRef} location={location}/> 
     </GestureHandlerRootView>
   );
 }
