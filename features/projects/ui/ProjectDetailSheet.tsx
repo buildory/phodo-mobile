@@ -7,6 +7,7 @@ import React, {
 import {
   StyleSheet,
 } from "react-native";
+import { useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { ProjectCard } from "./ProjectCard";
 
@@ -25,6 +26,12 @@ const ProjectDetailSheet = forwardRef<ProjectDetailSheetRef>(
     close: () => bottomSheetRef.current?.close(),
   }));
 
+  const router = useRouter();
+
+  const handlePressProject = (item) => {
+    router.replace(`/project/${item.id}/edit`);
+  }
+
     return (
       <BottomSheet
         ref={bottomSheetRef}
@@ -34,7 +41,7 @@ const ProjectDetailSheet = forwardRef<ProjectDetailSheetRef>(
         enablePanDownToClose={true}
       >
       <BottomSheetView style={styles.container}>
-        <ProjectCard project={project} />
+        <ProjectCard project={project} onPress={() => handlePressProject(project)}/>
       </BottomSheetView>
       </BottomSheet>
     );

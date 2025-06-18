@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { ProjectCard } from "./ProjectCard";
 import { RecruitTypeBadge } from "./RecruitTypeBadge";
@@ -24,13 +25,14 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["13%", "85%"], []);
 
+    const router = useRouter();
     useImperativeHandle(ref, () => ({
       open: (index = 0) => bottomSheetRef.current?.snapToIndex(index),
       close: () => bottomSheetRef.current?.close(),
     }));
 
     const handlePressProject = (item) => {
-      console.log(item.id)
+      router.replace(`/project/${item.id}/edit`);
     }
 
     return (
