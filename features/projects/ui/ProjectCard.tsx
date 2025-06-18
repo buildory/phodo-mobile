@@ -81,7 +81,7 @@ export function ProjectCard({ project, onPress }) {
         }}
       >
         <Badge
-          label={project.recruit_type === "model" ? "모델 구인" : "작가 구인"}
+          label={project.recruitType === "model" ? "모델 구인" : "작가 구인"}
           backgroundColor="#fff"
           color="#6172f3"
           borderColor="#6172f3"
@@ -89,7 +89,7 @@ export function ProjectCard({ project, onPress }) {
           borderWidth={1}
         />
         <Badge
-          label={project.pin_display === "always" ? "상시 촬영" : "버블 촬영"}
+          label={project.pinDisplay === "always" ? "상시 촬영" : "버블 촬영"}
           backgroundColor="#fff"
           color="#6172f3"
           borderColor="transparent"
@@ -128,11 +128,11 @@ export function ProjectCard({ project, onPress }) {
           </View>
 
           <Pressable
-            onPress={() => copyToClipboard(project.location_address)}
+            onPress={() => copyToClipboard(project.locationAddress)}
             style={{ flexDirection: "row", alignItems: "center" }}
           >
             <Text style={{ fontSize: 14, lineHeight: 18, color: "#535862" }}>
-              {project.input_location}
+              {project.inputLocation}
             </Text>
             <IconSymbol
               size={12}
@@ -145,7 +145,7 @@ export function ProjectCard({ project, onPress }) {
       </View>
 
       <View style={{ flexDirection: "row", gap: 4 }} className="category">
-        {project.project_categories.map((categoryWrapper) => (
+        {project.projectCategories.map((categoryWrapper) => (
           <Badge
             key={categoryWrapper.categories.id}
             label={categoryWrapper.categories.name}
@@ -158,7 +158,7 @@ export function ProjectCard({ project, onPress }) {
         ))}
       </View>
       <Badge
-        label={SHOOTING_PREFERENCE_LABELS[project.device_source]}
+        label={SHOOTING_PREFERENCE_LABELS[project.deviceSource]}
         backgroundColor="#fff"
         color="#000000"
         borderColor="#E9EAEB"
@@ -166,7 +166,7 @@ export function ProjectCard({ project, onPress }) {
         icon={<IconSymbol size={12} name="hash" color={"#000"} />}
       />
       <View style={{ flexDirection: "row", gap: 4 }} className="category">
-        {project.project_devices.map((deviceWrapper) => (
+        {project.projectDevices.map((deviceWrapper) => (
           <Badge
             key={deviceWrapper.devices.id}
             label={deviceWrapper.devices.name}
@@ -186,17 +186,17 @@ export function ProjectCard({ project, onPress }) {
         }}
       >
         <Badge
-          label={project.is_paid ? "유료" : "무료"}
+          label={project.isPaid ? "유료" : "무료"}
           backgroundColor="#9e77ed"
           color="#ffffff"
           borderRadius={4}
         />
         <Text style={{ color: "#9e77ed", fontWeight: 700 }}>
-          {project.is_paid
+          {project.isPaid
             ? `${new Intl.NumberFormat("ko-KR").format(
-                project.price_per_hour
+                project.pricePerHour
               )}원`
-            : COOPERATION_LABELS[project.request_note].title}
+            : COOPERATION_LABELS[project.requestNote].title}
         </Text>
       </View>
       <View style={styles.separator} />

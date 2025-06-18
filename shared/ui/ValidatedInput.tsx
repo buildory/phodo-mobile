@@ -5,12 +5,14 @@ type Props = {
   label?: string;
   error?: string | null;
   isDark?: boolean;
+  height?: number;
 } & TextInputProps;
 
 export default function ValidatedInput({
   label,
   error,
   isDark = false,
+  height = 50,
   ...props
 }: Props) {
   return (
@@ -21,6 +23,7 @@ export default function ValidatedInput({
         </Text>
       )}
       <TextInput
+        {...props}
         editable={props.editable ? props.editable : true}
         style={[
           styles.input,
@@ -28,6 +31,7 @@ export default function ValidatedInput({
             backgroundColor: isDark ? "#333" : "#fff",
             color: isDark ? "#fff" : "#000",
             borderColor: error ? "#f44336" : "#ccc",
+            height: height
           },
         ]}
         placeholderTextColor={isDark ? "#888" : "#999"}
@@ -47,7 +51,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    height: 50,
     paddingHorizontal: 15,
     borderRadius: 8,
     borderWidth: 1,
