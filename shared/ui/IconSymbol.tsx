@@ -26,7 +26,9 @@ const MAPPING = {
   'check': 'check',
   'menu': 'menu',
   'x': 'x',
-  'camera': 'camera'
+  'camera': 'camera',
+  'clock': 'clock',
+  'calendar': 'calendar',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
