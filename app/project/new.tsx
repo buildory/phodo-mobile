@@ -11,6 +11,7 @@ import {
   Button,
   Modal,
   TouchableOpacity,
+  TextInput
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
@@ -25,7 +26,7 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { getCurrentUserId } from "@/shared/lib/auth";
+import { getCurrentUser } from "@/entities/uesrs/api";
 import { createProject } from "@/entities/projects/api/createProject";
 import { uploadImages } from "@/entities/projects/api/uploadImages";
 import { useToast } from "@/shared/hooks/useToast";
@@ -69,7 +70,6 @@ const DAYS = [
 
 export default function CreateProjectPage() {
   const { form, setField, resetForm } = useProjectFormStore();
-  const [image, setImage] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -82,6 +82,7 @@ export default function CreateProjectPage() {
   const [localDurationInput, setLocalDurationInput] = useState(
     form.durationHours !== null ? String(form.durationHours) : ""
   );
+  const [upLoading, setUploading] = useState(false);
 
   const toast = useToast();
   const totalPrice =
@@ -251,31 +252,41 @@ export default function CreateProjectPage() {
     };
 
     try {
+      setUploading(true);
+
       const result = await createProject(payload);
-      console.log(result)
+
       const projectId = result?.id;
 
-      if(!projectId) {
-        toast.showError("프로젝트 등록에 실패했어요", "잠시 후 다시 시도해주세요.");
+      if (!projectId) {
+        toast.showError(
+          "프로젝트 등록에 실패했어요",
+          "잠시 후 다시 시도해주세요."
+        );
         return;
       }
 
       if (images.length > 0) {
-        await uploadImages({uris: images, projectId});
+        await uploadImages({ uris: images, projectId });
       }
 
+      resetForm();
+      router.back();
     } catch (error) {
-      
+      toast.showError(
+        "프로젝트 등록에 실패했어요",
+        "잠시 후 다시 시도해주세요."
+      );
+    } finally {
+      setUploading(false);
     }
-    resetForm();
-    router.back();
   };
 
   useEffect(() => {
     (async () => {
-      const userId = await getCurrentUserId();
-      if (userId) {
-        setField("userId", userId);
+      const userData = await getCurrentUser();
+      if (userData.data.user) {
+        setField("userId", userData.data.user.id);
       }
     })();
   }, []);
@@ -847,7 +858,7 @@ export default function CreateProjectPage() {
                 <Pressable
                   style={{
                     width: 100,
-                    height: 100,                
+                    height: 100,
                     borderWidth: 1,
                     borderRadius: 8,
                     alignItems: "center",
@@ -877,29 +888,47 @@ export default function CreateProjectPage() {
               >
                 상세 설명
               </Text>
-              <ValidatedInput
-                placeholder={`추가 설명이 필요하다면 작성해주세요
+                  <View style={styles.wrapper}>
+                    <TextInput
+                    multiline={true}
+                    textAlignVertical="top"
+                    value={form.description}
+                    onChangeText={(text) => setField("description", text)}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: "#fff",
+                          color:"#000",
+                          borderColor:  "#ccc",
+                          minHeight: 154
+                        },
+                      ]}
+                      placeholderTextColor={"#999"}
+                      placeholder={`추가 설명이 필요하다면 작성해주세요
 예:
-  - 촬영 기기: iPhone XS 모델이면 좋겠어요
-  - 니즈: 포즈를 잘 추천해주셨으면 좋겠어요
-  - 촬영 시간: 9:20 ~ 15:20 (6시간)`}
-                value={form.description}
-                onChangeText={(text) => setField("description", text)}
-                autoCapitalize="none"
-                height={124}
-              />
+- 촬영 기기: iPhone XS 모델이면 좋겠어요
+- 니즈: 포즈를 잘 추천해주셨으면 좋겠어요
+- 촬영 시간: 9:20 ~ 15:20 (6시간)`}
+                    />
+                  </View>
             </View>
           )}
 
-          <Pressable onPress={() => setIsDetailExpanded(!isDetailExpanded)}>
-            <Text>
+          <Pressable style={{display:'flex', flexDirection:'row', backgroundColor:'#f5f5f5', padding:12 , alignItems:'center', justifyContent:'center'}} onPress={() => setIsDetailExpanded(!isDetailExpanded)}>
+            <Text style={{marginLeft: 'auto'}}>
               {isDetailExpanded ? "추가 정보 접기" : "추가 정보 펼치기"}
             </Text>
+            <IconSymbol style={{marginLeft: 'auto'}} size={20} name={`${isDetailExpanded ? 'chevron.up' : 'chevron.down'}`} color={"#181D27"} />
           </Pressable>
         </View>
       </ScrollView>
       <View style={{ marginBottom: 52, marginTop: 20 }}>
-        <LongButton title={"촬영 맵핀 등록하기"} onPress={handleAddMapPin} />
+        <LongButton
+          loading={upLoading}
+          disabled={upLoading}
+          title={"촬영 맵핀 등록하기"}
+          onPress={handleAddMapPin}
+        />
       </View>
     </View>
   );
@@ -949,5 +978,14 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 16,
     color: "#333",
+  },
+  wrapper: {
+    marginBottom: 20,
+  },
+  input: {
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 16,
   },
 });
