@@ -13,6 +13,8 @@ const MAPPING = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
   'chevron.left': 'chevron-left',
+  'chevron.up': 'chevron-up',
+  'chevron.down': 'chevron-down',
   'magnifyingglass': 'search',
   'gearshape': 'settings',
   'plus': 'plus',
