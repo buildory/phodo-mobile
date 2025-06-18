@@ -29,9 +29,9 @@ const markerMap = {
 };
 
 export const getMarkerImage = (
-  recruitType: "bubble" | "default",
+  display: "bubble" | "always",
   role: SupportRole,
   userType: UserType
 ): any => {
-  return markerMap[recruitType][role][userType];
+  return markerMap[display][role][userType];
 };
