@@ -37,6 +37,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "11a9dde2-bcd3-486f-9ef2-7cfd39ae21c3"
+      }
+    },
+    "owner": "buildory"
   }
 }
