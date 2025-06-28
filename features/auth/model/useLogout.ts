@@ -2,13 +2,13 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { signOut } from "@/entities/auth/api";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 export const useLogout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
+  const supabase = getSupabaseClient();
   const logout = async (): Promise<boolean> => {
     setLoading(true);
     try {
