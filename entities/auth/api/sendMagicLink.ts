@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 type SendAuthLinkParams = {
   email: string;
@@ -7,6 +7,8 @@ type SendAuthLinkParams = {
 };
 
 export const sendMagicLink = async ({ email, redirectUrl, type }: SendAuthLinkParams) => {
+  const supabase = getSupabaseClient();
+  
   const fullRedirectUrl = type
     ? `${redirectUrl}?email=${encodeURIComponent(email)}&type=${encodeURIComponent(type)}`
     : `${redirectUrl}?email=${encodeURIComponent(email)}`;

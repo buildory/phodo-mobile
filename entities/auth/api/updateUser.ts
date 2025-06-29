@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 export type UpdateUserPayload = {
   email?: string;
@@ -13,6 +13,7 @@ export const updateUser = async ({
   data,
   emailRedirectTo,
 }: UpdateUserPayload) => {
+  const supabase = getSupabaseClient();
   const attributes = { email, password, data };
   const options = emailRedirectTo ? { emailRedirectTo } : {};
 

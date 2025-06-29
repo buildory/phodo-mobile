@@ -9,10 +9,22 @@ import 'react-native-reanimated';
 import { AuthProvider, useAuth, ToastProvider, QueryProvider } from '@/shared/providers';
 import { useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { usePushNotificationListeners } from '@/shared/hooks/usePushNotificationListeners'
+import * as Notifications from 'expo-notifications';
 SplashScreen.preventAutoHideAsync();
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
 export default function RootLayout() {
+  usePushNotificationListeners();
   return (
     <QueryProvider>
       <AuthProvider>
