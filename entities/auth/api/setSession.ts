@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 export type AuthTokenPair = {
   access_token: string;
@@ -6,6 +6,7 @@ export type AuthTokenPair = {
 };
 
 export const setSession = async ({ access_token, refresh_token }: AuthTokenPair) => {
+  const supabase = getSupabaseClient();
   return await supabase.auth.setSession({
     access_token,
     refresh_token,
