@@ -1,9 +1,11 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 import { Project, ProjectListParams } from "../model";
+import { toCamel } from "@/shared/lib";
 
 export const getProjects = async (
   params: ProjectListParams
 ): Promise<Project[]> => {
+  const supabase = getSupabaseClient();
   let query = supabase
     .from("projects")
     .select(
@@ -23,7 +25,7 @@ export const getProjects = async (
           devices (
             id,
             type,
-            name    
+          name    
           )
         )
       `
@@ -38,5 +40,5 @@ export const getProjects = async (
 
   if (error) throw error;
 
-  return data ?? [];
+  return data ? data.map(toCamel) : [];
 };

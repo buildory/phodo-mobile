@@ -13,6 +13,8 @@ const MAPPING = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
   'chevron.left': 'chevron-left',
+  'chevron.up': 'chevron-up',
+  'chevron.down': 'chevron-down',
   'magnifyingglass': 'search',
   'gearshape': 'settings',
   'plus': 'plus',
@@ -22,7 +24,9 @@ const MAPPING = {
   'users': 'users',
   'hash': 'hash',
   'check': 'check',
-  'menu': 'menu'
+  'menu': 'menu',
+  'x': 'x',
+  'camera': 'camera'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
