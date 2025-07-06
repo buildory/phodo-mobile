@@ -12,12 +12,14 @@ import { FontAwesome } from "@expo/vector-icons";
 import { useLogout } from "@/features/auth/model/useLogout";
 import { getCurrentUser } from "@/entities/uesrs/api";
 import { useAuth } from "@/shared/providers/AuthProvider";
+import { useUpdateProfile } from "@/entities/uesrs/model";
 
 export default function SettingScreen() {
   const isDark = false;
   const { logout, error, loading } = useLogout();
   const { user, loading: authLoading } = useAuth();
   const [userEmail, setUserEmail] = useState<string | undefined>();
+  const {mutate: updateProfile} = useUpdateProfile();
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -36,8 +38,11 @@ export default function SettingScreen() {
 
   const handleLogout = async () => {
     const success = await logout();
-    if (!success && error) {
-      Alert.alert("로그인 오류", error);
+    if(success && user?.id) {
+      await updateProfile({
+        id: user?.id,
+        values: { pushToken: null },
+      });
     }
   };
 

@@ -18,6 +18,8 @@ import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
 import { validateSignup } from "@/features/auth/lib/validate";
 import { getUserByEmail } from "@/entities/uesrs/api/getUserByEmail";
+import { createProfile } from "@/entities/uesrs/api/createProfile";
+import { getSession } from "@/entities/auth/api";
 
 const TIMER_DURATION = 60 * 10;
 type EmailVerificationStatus = "initial" | "sent" | "expired" | "verified";
@@ -66,7 +68,7 @@ export default function SignUpScreen() {
 
   const handleSignup = async () => {
     if (!validate()) return;
-
+  
     if (!isVerified) {
       setErrors((prev) => ({
         ...prev,
@@ -74,17 +76,35 @@ export default function SignUpScreen() {
       }));
       return;
     }
-    
+  
     setSignupLoading(true);
-    
+  
     const result = await updateUserInfo({ password: values.password });
-
+  
     if (result) {
-      router.replace("/(tabs)");
+      const { data: sessionData, error: sessionError } = await getSession();
+      const userId = sessionData?.session?.user?.id;
+  
+      if (!userId || sessionError) {
+        toast.showError("회원가입에 실패했어요", "세션에서 유저 정보를 가져올 수 없습니다.");
+        setSignupLoading(false);
+        return;
+      }
+
+      const {error: profileError } = await createProfile({
+        id: userId,
+        email: values.email,
+      });
+
+      if (profileError) {
+        toast.showError("프로필 생성에 실패했어요", "잠시 후 다시 시도해주세요.");
+      } else {
+        router.replace("/(tabs)");
+      }
     } else if (updateError) {
       toast.showError("회원가입에 실패했어요", "잠시 후 다시 시도해주세요.");
     }
-
+  
     setSignupLoading(false);
   };
 
@@ -108,8 +128,7 @@ export default function SignUpScreen() {
       setErrors((prev) => ({ ...prev, email: "이미 가입된 이메일입니다." }));
       return;
     }
-
-
+    
     setSendMailLoading(true);
 
     const sent = await send(values.email);
