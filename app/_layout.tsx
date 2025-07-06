@@ -11,6 +11,8 @@ import { useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { usePushNotificationListeners } from '@/shared/hooks/usePushNotificationListeners'
 import * as Notifications from 'expo-notifications';
+import '@/shared/styles/global.css';
+
 SplashScreen.preventAutoHideAsync();
 
 Notifications.setNotificationHandler({
