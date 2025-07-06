@@ -1,35 +1,30 @@
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator  } from "react-native";
-import { Colors } from '@/shared/styles/Colors';
+import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { cn } from "@/shared/lib";
 
 export default function LongButton({ title, onPress, loading, disabled = false }) {
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      style={[styles.button, { opacity: loading ? 0.6 : 1 }, disabled && { backgroundColor: '#e9eaeb' }]}
-      onPress={onPress}
-      disabled={disabled}
+<TouchableOpacity
+  activeOpacity={0.9}
+  className={cn(
+    "mt-20 px-16 py-12 rounded rounded-12",
+    loading ? "opacity-60" : "opacity-100",
+    disabled ? "bg-bg-disabled" : "bg-fg-brand"
+  )}
+  onPress={onPress}
+  disabled={disabled}
+>
+  {loading ? (
+    <ActivityIndicator color="#fff" />
+  ) : (
+    <Text
+    className={cn( 
+      "body1-semiBold text-fg-neutral-inverted text-center",
+      disabled ? "text-fg-disabled" : "text-fg-neutral-inverted"
+    )}
     >
-      {loading ? (
-        <ActivityIndicator color="#fff" />
-      ) : (
-        <Text style={styles.buttonText}>{title}</Text>
-      )}
-    </TouchableOpacity>
-  );
+      {title}
+    </Text>
+  )}
+</TouchableOpacity>
+  ); 
 }
-
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: Colors.purple[500],
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
