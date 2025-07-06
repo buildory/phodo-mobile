@@ -1,101 +1,57 @@
-import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { Pressable, Text, View, PressableProps } from "react-native";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/shared/lib";
 
 type BadgeProps = {
   label: string | number;
-  color?: string;
-  backgroundColor?: string;
-  size?: "sm" | "md" | "lg";
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
-  onPress?: () => void;
-};
+} & VariantProps<typeof badgeVariants> &
+  PressableProps;
 
-const Badge = ({
+const badgeVariants = cva(
+  "self-start w-fit flex-row items-center border rounded-full",
+  {
+    variants: {
+      size: {
+        sm: "px-6 py-3 caption2-medium",
+        md: "px-8 py-4 label2-medium",
+        lg: "px-10 py-5 body2-medium",
+      },
+      variant: {
+        default: "bg-bg-layer-default text-bg-neutral-inverted border-stroke-divider-subtle",
+        outline: "bg-transparent border-stroke-divider-subtle text-fg-neutral-solid",
+        subtle: "bg-bg-layer-subtle text-fg-neutral-muted border-stroke-divider-subtle",
+      },
+    },
+    defaultVariants: {
+      size: "md",
+      variant: "default",
+    },
+  }
+);
+
+export default function Badge({
   label,
-  color = "#fff",
-  backgroundColor = "#FF3B30",
-  size = "md",
-  borderColor,
-  borderWidth,
-  borderRadius,
   icon,
   iconPosition = "left",
+  size,
+  variant,
+  className,
   onPress,
-}: BadgeProps) => {
-  const sizeStyles = {
-    sm: {
-      paddingVertical: 4,
-      paddingHorizontal: 6,
-      fontSize: 12,
-      borderRadius: 12,
-    },
-    md: {
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-      fontSize: 14,
-      borderRadius: 14,
-    },
-    lg: {
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      fontSize: 16,
-      borderRadius: 16,
-    },
-  }[size];
-
-  const computedRadius = borderRadius ?? sizeStyles.borderRadius;
-
+  ...props
+}: BadgeProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.container,
-        {
-          backgroundColor,
-          borderColor,
-          borderWidth,
-          borderRadius: computedRadius,
-          paddingVertical: sizeStyles.paddingVertical,
-          paddingHorizontal: sizeStyles.paddingHorizontal,
-          opacity: pressed ? 0.8 : 1,
-        },
-      ]}
+      className={cn(badgeVariants({ size, variant }), className)}
+      {...props}
     >
-      {icon && iconPosition === "left" && (
-        <View style={styles.iconWrapper}>{icon}</View>
-      )}
-      <View style={styles.labelWrapper}>
-        <Text style={[styles.text, { color, fontSize: sizeStyles.fontSize }]}>
-          {label}
-        </Text>
-      </View>
-      {icon && iconPosition === "right" && (
-        <View style={styles.iconWrapper}>{icon}</View>
-      )}
+      {icon && iconPosition === "left" && <View className="mr-2">{icon}</View>}
+
+      <Text className="caption1-medium bg-bg-">{label}</Text>
+
+      {icon && iconPosition === "right" && <View className="ml-2">{icon}</View>}
     </Pressable>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  labelWrapper: {
-    justifyContent: "center",
-  },
-  text: {
-    textAlign: "center",
-    lineHeight: 18,
-  },
-  iconWrapper: {
-    marginHorizontal: 4,
-  },
-});
-
-export default Badge;
+}
