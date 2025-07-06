@@ -3,13 +3,12 @@ import React from "react";
 import { Platform } from "react-native";
 import { HapticTab } from "@/shared/ui/HapticTab";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
-import { Colors } from "@/shared/styles/Colors";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.purple[500],
+        tabBarActiveTintColor: "#9E77ED",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: undefined,
