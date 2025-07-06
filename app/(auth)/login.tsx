@@ -1,9 +1,11 @@
 import React from "react";
 import {
   View,
+  ScrollView,
   Text,
-  StyleSheet,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useLogin } from "@/features/login/model/useLogin";
@@ -18,113 +20,89 @@ import { getCurrentUser } from "@/entities/uesrs/api";
 import { useUpdateProfile } from "@/entities/uesrs/model";
 
 export default function LoginScreen() {
-  const {
-    values,
-    setValue,
-    errors,
-    validate,
-  } = useFormValidator({ email: "", password: "" }, validateLogin);
+  const { values, setValue, errors, validate } = useFormValidator(
+    { email: "", password: "" },
+    validateLogin
+  );
   const router = useRouter();
   const { login, loading } = useLogin();
   const toast = useToast();
   const { expoPushToken } = useRegisterPushToken();
-  const {mutate: updateProfile} = useUpdateProfile();
+  const { mutate: updateProfile } = useUpdateProfile();
 
   const handleLogin = async () => {
     if (!validate()) return;
-    const {success, message} = await login(values.email, values.password);
-    
+    const { success, message } = await login(values.email, values.password);
+
     if (!success) {
       toast.showError("로그인 실패", message ?? "알 수 없는 오류입니다.");
     } else {
-
       const { data, error } = await getCurrentUser();
 
       if (data?.user) {
-      await updateProfile({
-        id: data.user.id,
-        values: { pushToken: expoPushToken },
-      });
+        await updateProfile({
+          id: data.user.id,
+          values: { pushToken: expoPushToken },
+        });
       } else {
         console.error("유저 정보를 불러오지 못했습니다.", error);
       }
-
     }
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: "#fff" }]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-bg-layer-default p-20"
     >
-      <Text style={[styles.title, { color: "#000" }]}>
-        포도 (Phodo)
-      </Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+      >
+        <Text className="title2-bold text-fg-brand text-center mb-40">
+          포도 (Phodo)
+        </Text>
 
-      <ValidatedInput
-        label="이메일"
-        placeholder="이메일을 입력해주세요"
-        value={values.email}
-        onChangeText={(text) => setValue("email", text)}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        error={errors.email}
-      />
-      <ValidatedInput
-        label="비밀번호"
-        placeholder="비밀번호를 입력해주세요"
-        value={values.password}
-        onChangeText={(text) => setValue("password", text)}
-        secureTextEntry
-        error={errors.password}
-      />
-      <LongButton
-        title={"로그인 하기"}
-        loading={loading}
-        onPress={handleLogin}
-      />
+        <View className="gap-20">
+          <ValidatedInput
+            label="이메일"
+            placeholder="이메일을 입력해주세요"
+            value={values.email}
+            onChangeText={(text) => setValue("email", text)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={errors.email}
+          />
+          <ValidatedInput
+            label="비밀번호"
+            placeholder="비밀번호를 입력해주세요"
+            value={values.password}
+            onChangeText={(text) => setValue("password", text)}
+            secureTextEntry
+            error={errors.password}
+          />
+        </View>
+        <LongButton
+          title={"로그인 하기"}
+          loading={loading}
+          onPress={handleLogin}
+        />
 
-      <View style={styles.signupContainer}>
-        <TouchableOpacity onPress={() => router.push("/(auth)/reset-password")}>
-          <Text
-            style={[styles.signupLink, { color: "#000" }]}
+        <View className="gap-16 flex-row justify-center mt-20">
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/reset-password")}
           >
-            비밀번호 찾기
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-          <Text
-            style={[styles.signupLink, { color: "#6172f3" }]}
-          >
-            회원가입
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <GoogleLoginButton />
-    </View>
+            <Text className="body1-semiBold text-fg-neutral-muted">
+              비밀번호 찾기
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+            <Text className="body1-semiBold text-fg-brand">회원가입</Text>
+          </TouchableOpacity>
+        </View>
+        <View className="h-1 bg-stroke-divider-subtle mt-20"></View>
+        <GoogleLoginButton />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  signupContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-  signupLink: {
-    fontSize: 14,
-    color: "#4285F4",
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-});
