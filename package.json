@@ -11,7 +11,8 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "openapi:generate": "npx tsx docs/openapi-generator.ts",
-    "openapi:docs": "npx redocly build-docs docs/openapi.json --output docs/index.html"
+    "openapi:docs": "npx redocly build-docs docs/openapi.json --output docs/index.html",
+    "tokens:build": "node ./scripts/generate-token.mjs"
   },
   "jest": {
     "preset": "jest-expo"
