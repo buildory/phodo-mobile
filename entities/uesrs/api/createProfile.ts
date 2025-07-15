@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabaseClient } from "@/shared/lib/supabase";
 
 type CreateProfileParams = {
   id: string;
@@ -6,6 +6,7 @@ type CreateProfileParams = {
 };
 
 export const createProfile = async ({ id, email }: CreateProfileParams) => {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.from("profiles").upsert(
     [
       {
