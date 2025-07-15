@@ -60,7 +60,7 @@ const SHOOTING_PREFERENCE_LABELS: Record<ShootingPreference, string> = {
   model_device: "모델님 기기로 촬영 가능해요",
 };
 
-export function ProjectCard({ project }) {
+export function ProjectCard({ project, onPress }) {
   return (
     <View
       className="card"
@@ -96,13 +96,15 @@ export function ProjectCard({ project }) {
           borderWidth={1}
         />
       </View>
-      <Text
-        numberOfLines={2}
-        ellipsizeMode="tail"
-        style={{ fontWeight: "bold", fontSize: 18 }}
-      >
-        {project.title}
-      </Text>
+      <Pressable onPress={onPress}>
+        <Text
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          style={{ fontWeight: "bold", fontSize: 18 }}
+        >
+          {project.title}
+        </Text>
+      </Pressable>
       <View
         style={{
           flexDirection: "row",

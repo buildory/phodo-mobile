@@ -10,6 +10,7 @@ import { AuthProvider, useAuth, ToastProvider, QueryProvider } from '@/shared/pr
 import { useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { usePushNotificationListeners } from '@/shared/hooks/usePushNotificationListeners'
+import { useCurrentUser } from '@/entities/uesrs/model';
 import * as Notifications from 'expo-notifications';
 import '@/shared/styles/global.css';
 
@@ -39,6 +40,7 @@ export default function RootLayout() {
 function InnerLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  useCurrentUser();
 
   const [fontsLoaded] = useFonts({
     PretendardThin: require('@/assets/fonts/Pretendard-Thin.ttf'),
@@ -54,7 +56,7 @@ function InnerLayout() {
 
   const { user, loading } = useAuth();
   const ready = fontsLoaded && !loading;
-
+  
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();

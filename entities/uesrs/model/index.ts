@@ -1,1 +1,2 @@
-export { useUpdateProfile } from "./useUpdateProfile";
+export { useCurrentUser } from "./useCurrentUser";
+export { useUpdateProfile } from "./useUpdateProfile"

@@ -21,12 +21,17 @@ const MAPPING = {
   'mappin': 'map-pin',
   'crosshair': 'crosshair',
   'copy': 'copy',
+  'person': 'user',
   'users': 'users',
   'hash': 'hash',
   'check': 'check',
-  'menu': 'menu',
+  'line.3.horizontal': 'menu',
   'x': 'x',
-  'camera': 'camera'
+  'camera': 'camera',
+  'clock': 'clock',
+  'calendar': 'calendar',
+  'message': 'message-square',
+  'clipboard': 'clipboard'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

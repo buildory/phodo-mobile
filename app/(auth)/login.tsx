@@ -15,9 +15,6 @@ import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import LongButton from "@/shared/ui/Button";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
 import { useToast } from "@/shared/hooks/useToast";
-import { useRegisterPushToken } from "@/shared/hooks/useRegisterPushToken";
-import { getCurrentUser } from "@/entities/uesrs/api";
-import { useUpdateProfile } from "@/entities/uesrs/model";
 
 export default function LoginScreen() {
   const { values, setValue, errors, validate } = useFormValidator(
@@ -27,8 +24,6 @@ export default function LoginScreen() {
   const router = useRouter();
   const { login, loading } = useLogin();
   const toast = useToast();
-  const { expoPushToken } = useRegisterPushToken();
-  const { mutate: updateProfile } = useUpdateProfile();
 
   const handleLogin = async () => {
     if (!validate()) return;
@@ -36,17 +31,6 @@ export default function LoginScreen() {
 
     if (!success) {
       toast.showError("로그인 실패", message ?? "알 수 없는 오류입니다.");
-    } else {
-      const { data, error } = await getCurrentUser();
-
-      if (data?.user) {
-        await updateProfile({
-          id: data.user.id,
-          values: { pushToken: expoPushToken },
-        });
-      } else {
-        console.error("유저 정보를 불러오지 못했습니다.", error);
-      }
     }
   };
 

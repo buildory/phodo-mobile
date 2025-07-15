@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { ProjectCard } from "./ProjectCard";
 import { RecruitTypeBadge } from "./RecruitTypeBadge";
@@ -24,10 +25,15 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["13%", "85%"], []);
 
+    const router = useRouter();
     useImperativeHandle(ref, () => ({
       open: (index = 0) => bottomSheetRef.current?.snapToIndex(index),
       close: () => bottomSheetRef.current?.close(),
     }));
+
+    const handlePressProject = (item) => {
+      router.replace(`/project/${item.id}/edit`);
+    }
 
     return (
       <BottomSheet
@@ -49,7 +55,7 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
             <FlatList
               data={projects}
               keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => <ProjectCard project={item} />}
+              renderItem={({ item }) => <ProjectCard project={item} onPress={() => handlePressProject(item)}/>}
               contentContainerStyle={styles.flatListContent}
               keyboardShouldPersistTaps="always"
               showsVerticalScrollIndicator={false}
