@@ -22,7 +22,6 @@ import ProjectDetailSheet, {
 import CreateProjectSheet, { CreateProjectSheetRef } from "@/features/projects/ui/CreateProjectSheet";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { getCurrentUserId } from "@/shared/lib/auth";
 import {
   getDistanceFromLatLonInKm,
   getMarkerImage,
@@ -31,6 +30,9 @@ import { getAddress } from "@/features/projects/api/getAddress";
 import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
 import { useMapCameraInit } from "@/features/projects/model/useMapCameraInit";
 import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";  
+import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
+import { useUpdateProfile } from "@/entities/uesrs/model";
+import { useRegisterPushToken } from "@/shared/hooks/useRegisterPushToken";
 
 export default function SearchScreen() {
   const isDark = false;
@@ -56,11 +58,12 @@ export default function SearchScreen() {
   const myLocation = useWatchLocation();
   useMapCameraInit(myLocation, setCamera);
 
-  const [currentUserId, setCurrentUserId] = useState();
-  const [open, setOpen] = useState(false);
+  const { profile } = useCurrentUserStore();
   const [projectsWithDistance, setProjectsWithDistance] = useState([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const { data: projects } = useProjects({recruitType: selectedType});
+  const { expoPushToken } = useRegisterPushToken();
+  const { mutate: updateProfile } = useUpdateProfile();
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const listSheetRef = useRef<ProjectListSheetRef>(null);
@@ -97,19 +100,21 @@ const handleCameraIdle = (e) => {
   }, [projects, myLocation]);
 
   useEffect(() => {
-    (async () => {
-      const userId = await getCurrentUserId();
-      setCurrentUserId(userId);
-    })();
-  }, []);
-
-  useEffect(() => {
     if (projectsWithDistance.length > 0) {
       InteractionManager.runAfterInteractions(() => {
         listSheetRef.current?.open(0);
       });
     }
   }, [projectsWithDistance]);
+
+  useEffect(() => {
+    if (profile && expoPushToken) {
+      updateProfile({
+          id: profile.id,
+          values: { pushToken: expoPushToken },
+        });
+    }
+  }, [profile, expoPushToken]);
 
   return (
     <GestureHandlerRootView
@@ -152,7 +157,7 @@ const handleCameraIdle = (e) => {
               image={getMarkerImage(
                 project.pinDisplay,
                 project.recruitType,
-                project.userId === currentUserId
+                project.userId === profile?.id
                   ? "self"
                   : project.profiles.gender
               )}

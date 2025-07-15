@@ -26,7 +26,7 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { getCurrentUser } from "@/entities/uesrs/api";
+import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
 import { createProject } from "@/entities/projects/api/createProject";
 import { uploadImages } from "@/entities/projects/api/uploadImages";
 import { useToast } from "@/shared/hooks/useToast";
@@ -83,6 +83,7 @@ export default function CreateProjectPage() {
     form.durationHours !== null ? String(form.durationHours) : ""
   );
   const [upLoading, setUploading] = useState(false);
+  const { profile } = useCurrentUserStore();
 
   const toast = useToast();
   const totalPrice =
@@ -283,13 +284,10 @@ export default function CreateProjectPage() {
   };
 
   useEffect(() => {
-    (async () => {
-      const userData = await getCurrentUser();
-      if (userData.data.user) {
-        setField("userId", userData.data.user.id);
-      }
-    })();
-  }, []);
+    if (profile) {
+      setField("userId", profile.id);
+    }
+  }, [profile]);
 
   useEffect(() => {
     setSelectedDates([]);
