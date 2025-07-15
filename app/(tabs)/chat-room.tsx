@@ -1,6 +1,5 @@
 import { SafeAreaView } from "react-native";
 
-export default function MyPageScreen() {
+export default function ChatRoomScreen() {
   return <SafeAreaView></SafeAreaView>;
 }
-

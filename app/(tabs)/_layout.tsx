@@ -30,11 +30,38 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="shooting-history"
+        options={{
+          title: "촬영 내역",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="clipboard" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat-room"
+        options={{
+          title: "채팅",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="message" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="my-page"
+        options={{
+          title: "마이 포도",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="setting"
         options={{
-          title: "설정",
+          title: "전체",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gearshape" color={color} />
+            <IconSymbol size={28} name="line.3.horizontal" color={color} />
           ),
         }}
       />
