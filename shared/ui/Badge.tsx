@@ -49,7 +49,7 @@ export default function Badge({
     >
       {icon && iconPosition === "left" && <View className="mr-2">{icon}</View>}
 
-      <Text className="caption1-medium bg-bg-">{label}</Text>
+      <Text className="caption1-medium">{label}</Text>
 
       {icon && iconPosition === "right" && <View className="ml-2">{icon}</View>}
     </Pressable>
