@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 
 extendZodWithOpenApi(z);
 
@@ -87,3 +87,37 @@ export const ProjectListParamsSchema = z
       }),
   })
   .openapi("ProjectListParams");
+
+export const ConceptImagesSchema = z
+  .object({
+    id: z.number().openapi({ example: 8 }),
+    projectId: z.number().openapi({ example: 36 }),
+    imageUrl: z.string().openapi({ example: "https://example.com/image.jpg" }),
+    orderIndex: z.number().openapi({ example: 0 }),
+  })
+  .openapi("ConceptImages");
+
+export const ApplicantSchema = z.object({
+  id: z.number().openapi({ example: 8 }),
+  projectId: z.number().openapi({ example: 36 }),
+  applicantId: z
+    .string()
+    .openapi({ example: "0a48f1b7-6d5b-4771-bc15-9d30bd13312c" }),
+  status: z.string().openapi({ example: "pending" }),
+  createdAt: z
+    .string()
+    .openapi({ format: "date-time", example: "2025-06-03T01:17:49.869079" }),
+  updatedAt: z
+    .string()
+    .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
+  message: z
+    .string()
+    .optional()
+    .openapi({ example: "응답이 늦거나 연락이 어려웠어요" }),
+});
+
+export const CreateApplicantParamsSchema = ApplicantSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
