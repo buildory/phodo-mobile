@@ -11,6 +11,8 @@ import { useRouter } from "expo-router";
 import { useLogin } from "@/features/login/model/useLogin";
 import { validateLogin } from "@/features/login/lib/validate";
 import { GoogleLoginButton } from "@/features/login/ui/GoogleLoginButton";
+import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
+import { getCurrentUser } from "@/entities/uesrs/api";
 import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import LongButton from "@/shared/ui/Button";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
@@ -21,6 +23,7 @@ export default function LoginScreen() {
     { email: "", password: "" },
     validateLogin
   );
+  const { setProfile } = useCurrentUserStore();
   const router = useRouter();
   const { login, loading } = useLogin();
   const toast = useToast();
@@ -30,8 +33,16 @@ export default function LoginScreen() {
     const { success, message } = await login(values.email, values.password);
 
     if (!success) {
-      toast.showError("로그인 실패", message ?? "알 수 없는 오류입니다.");
+      return toast.showError("로그인 실패", message ?? "알 수 없는 오류입니다.");
     }
+
+  try {
+    const profile = await getCurrentUser();
+    setProfile(profile);
+  } catch (err) {
+    console.error("유저 정보 가져오기 실패:", err);
+    toast.showError("로그인 오류", "유저 정보를 불러오는 데 실패했습니다.");
+  }
   };
 
   return (

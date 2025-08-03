@@ -6,12 +6,15 @@ import {
 import { useRouter } from "expo-router";
 import { signInWithGoogle } from "@/entities/auth/api";
 import { createProfile } from "@/entities/uesrs/api/createProfile";
+import { getCurrentUser } from "@/entities/uesrs/api";
+import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
 import { useToast } from "@/shared/hooks/useToast";
 
 export const useGoogleLogin = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const toast = useToast();
+  const { setProfile } = useCurrentUserStore();
 
   const loginWithGoogle = async () => {
     setLoading(true);
@@ -37,6 +40,14 @@ export const useGoogleLogin = () => {
         id: data.user.id,
         email: data.user.email ?? "",
       });
+
+        try {
+          const profile = await getCurrentUser();
+          setProfile(profile);
+        } catch (err) {
+          console.error("유저 정보 가져오기 실패:", err);
+          toast.showError("로그인 오류", "유저 정보를 불러오는 데 실패했습니다.");
+        }
 
       if (profileError) {
         toast.showError("프로필 생성에 실패했어요", "잠시 후 다시 시도해주세요.");
