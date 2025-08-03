@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/lib";
 
 const tabVariants = cva(
-  "flex-1 items-center",
+  "flex-1 items-center bg-bg-layer-default",
   {
     variants: {
       variant: {
@@ -108,7 +108,7 @@ export function Tabs({
         })}
       </View>
 
-      <View className={cn("flex-1 justify-center items-center p-4", contentClassName)}>
+      <View className={cn("flex-1", contentClassName)}>
         {activeTabContent}
       </View>
     </View>
