@@ -105,10 +105,10 @@ export const ApplicantSchema = z.object({
     .openapi({ example: "0a48f1b7-6d5b-4771-bc15-9d30bd13312c" }),
   status: z.string().openapi({ example: "pending" }),
   createdAt: z
-    .string()
+    .date()
     .openapi({ format: "date-time", example: "2025-06-03T01:17:49.869079" }),
   updatedAt: z
-    .string()
+    .date()
     .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
   message: z
     .string()
@@ -120,4 +120,11 @@ export const CreateApplicantParamsSchema = ApplicantSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const UpdateApplicantParamsSchema = ApplicantSchema.omit({
+  id: true,
+  createdAt: true,
+  projectId: true,
+  applicantId: true
 });
