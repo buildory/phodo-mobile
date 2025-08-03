@@ -39,7 +39,7 @@ export default function ProjectEditScreen() {
   const { mutate: createNotification } = useCreateNotification();
   const myLocation = useWatchLocation();
   const [alreadyApplied, setAlreadyApplied] = useState(false);
-
+  
   const distance =
     myLocation?.latitude != null &&
     myLocation?.longitude != null &&
@@ -109,7 +109,7 @@ export default function ProjectEditScreen() {
             title: "매칭 대기",
             body: `${profile?.nickname ? `${profile.nickname}님이` : "누군가"} 모집글에 지원했어요. 좋은 만남이 기대되네요!`,
             userId: project.userId,
-            data: {},
+            data: { type: "shooting", userId: project.userId },
           });
         },
         onError: (error: any) => {
