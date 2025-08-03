@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -27,7 +27,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
-  usePushNotificationListeners();
+
   return (
     <QueryProvider>
       <AuthProvider>
@@ -41,6 +41,8 @@ function InnerLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   useCurrentUser();
+  usePushNotificationListeners();
+
 
   const [fontsLoaded] = useFonts({
     PretendardThin: require('@/assets/fonts/Pretendard-Thin.ttf'),
@@ -77,7 +79,9 @@ function InnerLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Slot />
+        <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
       <ToastProvider />
       <StatusBar style="auto" />
     </ThemeProvider>

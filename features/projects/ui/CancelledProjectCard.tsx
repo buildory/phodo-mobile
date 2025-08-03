@@ -1,0 +1,60 @@
+import { View, Text } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { getRelativeTime } from "@/shared/lib";
+import ActionButton from "@/shared/ui/ActionButton";
+import { ShootingStatusBadge } from "@/entities/projects/ui";
+import { useDeleteApplicant } from "@/entities/projects/model";
+import { useToast } from "@/shared/hooks/useToast";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+export default function CancelledProjectCard({ item, project }) {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const { mutate: deleteMatch } = useDeleteApplicant();
+
+  const handleDeleteHistory = () => {
+    deleteMatch(item.id, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+      },
+      onError: (error: any) => {
+        console.error("기록 삭제 중 오류:", error);
+        toast.showError("기록 삭제 실패했어요", "잠시 후 다시 시도해주세요.");
+      },
+    });
+  };
+
+  return (
+    <View className="p-16 gap-8 flex flex-col bg-bg-layer-default rounded-16">
+      <View className="flex flex-row justify-between items-center">
+        <ShootingStatusBadge status={item?.status} />
+        <Text className="caption1-regular">
+          {getRelativeTime(item.createdAt)}
+        </Text>
+      </View>
+      <View className="flex flex-row justify-between">
+        <Text>{item?.applicant?.nickname}</Text>
+      </View>
+      <View className="flex flex-row gap-6">
+        <MaterialCommunityIcons
+          name="alarm-light-outline"
+          size={24}
+          color="black"
+        />
+        <Text className="label1-regular text-fg-neutral-muted">
+          취소한 사유
+        </Text>
+        <Text className="label1-medium text-fg-neutral-solid">
+          응답이 늦거나 연락이 어려웠어요
+        </Text>
+      </View>
+      <ActionButton
+        onPress={handleDeleteHistory}
+        className="flex-1"
+        size={"md"}
+        variant={"assistive"}
+        title={"기록 삭제"}
+      />
+    </View>
+  );
+}

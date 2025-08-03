@@ -6,6 +6,8 @@ type BadgeProps = {
   label: string | number;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
+  className?: string;
+  textClassName?: string;
 } & VariantProps<typeof badgeVariants> &
   PressableProps;
 
@@ -19,9 +21,12 @@ const badgeVariants = cva(
         lg: "px-10 py-5 body2-medium",
       },
       variant: {
-        default: "bg-bg-layer-default text-bg-neutral-inverted border-stroke-divider-subtle",
-        outline: "bg-transparent border-stroke-divider-subtle text-fg-neutral-solid",
-        subtle: "bg-bg-layer-subtle text-fg-neutral-muted border-stroke-divider-subtle",
+        default:
+          "bg-bg-layer-default text-bg-neutral-inverted border-stroke-divider-subtle",
+        outline:
+          "bg-transparent border-stroke-divider-subtle text-fg-neutral-solid",
+        subtle:
+          "bg-bg-layer-subtle text-fg-neutral-muted border-stroke-divider-subtle",
       },
     },
     defaultVariants: {
@@ -31,6 +36,25 @@ const badgeVariants = cva(
   }
 );
 
+const badgeTextVariants = cva("", {
+  variants: {
+    size: {
+      sm: "caption2-medium",
+      md: "label2-medium",
+      lg: "body2-medium",
+    },
+    variant: {
+      default: "text-bg-neutral-inverted",
+      outline: "text-fg-neutral-solid",
+      subtle: "text-fg-neutral-muted",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+    variant: "default",
+  },
+});
+
 export default function Badge({
   label,
   icon,
@@ -38,9 +62,13 @@ export default function Badge({
   size,
   variant,
   className,
+  textClassName,
   onPress,
   ...props
 }: BadgeProps) {
+  const container = badgeVariants({ size, variant });
+  const text = badgeTextVariants({ size, variant });
+
   return (
     <Pressable
       onPress={onPress}
@@ -48,9 +76,9 @@ export default function Badge({
       {...props}
     >
       {icon && iconPosition === "left" && <View className="mr-2">{icon}</View>}
-
-      <Text className="caption1-medium">{label}</Text>
-
+      <Text className={cn(badgeTextVariants({ size, variant }), textClassName)}>
+        {label}
+      </Text>
       {icon && iconPosition === "right" && <View className="ml-2">{icon}</View>}
     </Pressable>
   );

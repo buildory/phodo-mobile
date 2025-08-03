@@ -29,7 +29,7 @@ const ProjectDetailSheet = forwardRef<ProjectDetailSheetRef>(
   const router = useRouter();
 
   const handlePressProject = (item) => {
-    router.replace(`/project/${item.id}/edit`);
+    router.push(`/project/${item.id}/edit`);
   }
 
     return (

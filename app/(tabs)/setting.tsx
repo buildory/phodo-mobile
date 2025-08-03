@@ -1,6 +1,0 @@
-import { SafeAreaView } from "react-native";
-
-export default function MyPageScreen() {
-  return <SafeAreaView></SafeAreaView>;
-}
-

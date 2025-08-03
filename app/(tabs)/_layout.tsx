@@ -50,18 +50,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="my-page"
         options={{
-          title: "마이 포도",
+          title: "프로필",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="setting"
-        options={{
-          title: "전체",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="line.3.horizontal" color={color} />
           ),
         }}
       />

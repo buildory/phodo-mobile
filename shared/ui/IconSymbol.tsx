@@ -31,7 +31,8 @@ const MAPPING = {
   'clock': 'clock',
   'calendar': 'calendar',
   'message': 'message-square',
-  'clipboard': 'clipboard'
+  'clipboard': 'clipboard',
+  'dot-single': 'dot-single'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

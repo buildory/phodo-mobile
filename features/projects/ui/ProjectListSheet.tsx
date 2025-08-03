@@ -32,7 +32,7 @@ const ProjectListSheet = forwardRef<ProjectListSheetRef>(
     }));
 
     const handlePressProject = (item) => {
-      router.replace(`/project/${item.id}/edit`);
+      router.push(`/project/${item.id}/edit`);
     }
 
     return (
