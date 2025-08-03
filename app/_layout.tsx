@@ -27,7 +27,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
-  usePushNotificationListeners();
+
   return (
     <QueryProvider>
       <AuthProvider>
@@ -41,6 +41,8 @@ function InnerLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   useCurrentUser();
+  usePushNotificationListeners();
+
 
   const [fontsLoaded] = useFonts({
     PretendardThin: require('@/assets/fonts/Pretendard-Thin.ttf'),
