@@ -79,8 +79,16 @@ function InnerLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="webview" 
+          options={{ 
+            presentation: "modal",
+            headerShown: false 
+          }} 
+        />
       </Stack>
       <ToastProvider />
       <StatusBar style="auto" />
