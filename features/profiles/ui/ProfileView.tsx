@@ -6,12 +6,18 @@ import {
   Image,
   ScrollView,
   Linking,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { cn } from "@/shared/lib";
 import { Tabs, TabItem } from "@/shared/ui/Tabs";
 import { ExtendedProfile } from "@/entities/uesrs/model/user.types";
+import { useMyProjects } from "@/entities/projects/model";
+import { ProjectCard } from "@/features/projects/ui/ProjectCard";
+import { usePortfolioImages } from "@/entities/uesrs/model";
+
+const { width: screenWidth } = Dimensions.get('window');
 
 type ProfileType = "photographer" | "model";
 
@@ -24,24 +30,35 @@ interface ProfileViewProps {
 export function ProfileView({
   profile,
   isOwnProfile,
-  onBack,
 }: ProfileViewProps) {
   const [selectedProfile, setSelectedProfile] =
     useState<ProfileType>("photographer");
+  
+  const { data: myProjects } = useMyProjects(profile?.id ?? "");
+  const filteredProjects = myProjects?.filter(
+    (project) =>
+      (selectedProfile === "model" && project.recruitType === "photographer") ||
+      (selectedProfile === "photographer" && project.recruitType === "model")
+  ) || [];
 
-  // 실제 통계 데이터 사용
+  // 포트폴리오 이미지들 가져오기
+  const { data: portfolioImages } = usePortfolioImages(
+    profile?.id ?? "",
+    selectedProfile
+  );
+
   const getStats = (type: ProfileType) => {
-    if (type === "photographer" && profile.photographerProfile) {
+    if (type === "photographer" && profile?.photographerProfile) {
       return {
-        totalShoots: profile.photographerProfile.totalShootings,
-        totalHours: profile.photographerProfile.totalShootingTime,
-        avgMatchSpeed: profile.photographerProfile.avgMatchingSpeed,
+        totalShoots: profile.photographerProfile.totalShootings || 0,
+        totalHours: profile.photographerProfile.totalShootingTime || 0,
+        avgMatchSpeed: profile.photographerProfile.avgMatchingSpeed || 0,
       };
-    } else if (type === "model" && profile.modelProfile) {
+    } else if (type === "model" && profile?.modelProfile) {
       return {
-        totalShoots: profile.modelProfile.totalShootings,
-        totalHours: profile.modelProfile.totalShootingTime,
-        avgMatchSpeed: profile.modelProfile.avgMatchingSpeed,
+        totalShoots: profile.modelProfile.totalShootings || 0,
+        totalHours: profile.modelProfile.totalShootingTime || 0,
+        avgMatchSpeed: profile.modelProfile.avgMatchingSpeed || 0,
       };
     }
 
@@ -61,20 +78,43 @@ export function ProfileView({
 
       {/* 포트폴리오 & 프로필 정보 */}
       <View className="">
-        {/* 포트폴리오 대표 사진 */}
-        <View className="relative border border-gray-40">
-          <View
-            className="w-full overflow-hidden bg-bg-layer-subtle rounded-12"
-            style={{ height: 160 }}
-          >
-            {/* 포트폴리오 이미지 - 추후 실제 이미지로 교체 */}
-            <View className="items-center justify-center w-full h-full bg-purple-100">
-              <FontAwesome name="camera" size={28} color="#9E77ED" />
-              <Text className="mt-6 body2-regular text-fg-brand">
-                포트폴리오 대표 사진
-              </Text>
-            </View>
-          </View>
+                 {/* 포트폴리오 대표 사진 */}
+         <View className="relative border border-gray-40">
+           <View
+             className="w-full overflow-hidden bg-bg-layer-subtle rounded-12"
+             style={{ height: 160 }}
+           >
+             {/* 포트폴리오 이미지 가로 스크롤 */}
+             {portfolioImages && portfolioImages.length > 0 ? (
+               <ScrollView
+                 horizontal
+                 pagingEnabled
+                 showsHorizontalScrollIndicator={false}
+                 className="w-full h-full"
+               >
+                 {portfolioImages.map((image, index) => (
+                   <View
+                     key={image.id}
+                     style={{ width: screenWidth - 40 }} // 좌우 마진 제외
+                     className="h-full"
+                   >
+                     <Image
+                       source={{ uri: image.url }}
+                       className="w-full h-full"
+                       resizeMode="cover"
+                     />
+                   </View>
+                 ))}
+               </ScrollView>
+             ) : (
+               <View className="items-center justify-center w-full h-full bg-purple-100">
+                 <FontAwesome name="camera" size={28} color="#9E77ED" />
+                 <Text className="mt-6 body2-regular text-fg-brand">
+                   포트폴리오 대표 사진
+                 </Text>
+               </View>
+             )}
+           </View>
 
           {/* 수정 버튼 - 본인 프로필일 때만 표시 */}
           {isOwnProfile && (
@@ -104,7 +144,25 @@ export function ProfileView({
                     className="w-full h-full rounded-full"
                   />
                 ) : (
-                  <FontAwesome name="user" size={24} color="#999" />
+                  <View
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 32,
+                      backgroundColor: "#F3F0FF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: 2,
+                      borderColor: "#E0D7FB",
+                      shadowColor: "#9E77ED",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.12,
+                      shadowRadius: 6,
+                      elevation: 2,
+                    }}
+                  >
+                    <FontAwesome name="user" size={32} color="#B39DDB" />
+                  </View>
                 )}
               </View>
             </View>
@@ -115,8 +173,8 @@ export function ProfileView({
         <View className="items-center mt-20">
           {/* 닉네임 */}
 
-          <View className="flex-row justify-end items-center w-full px-16">
-            <Text className="body2-medium text-fg-neutral-solid mr-12">
+          <View className="flex-row items-center justify-end w-full px-16">
+            <Text className="mr-12 body2-medium text-fg-neutral-solid">
               {profile?.nickname || "사용자"}
             </Text>
             <View className="flex-row items-center gap-8">
@@ -279,7 +337,7 @@ export function ProfileView({
         <View className="p-20 bg-bg-layer-subtle rounded-12">
           <View className="flex-row items-center justify-between mb-16">
             <View className="items-center flex-1">
-              <Text className="caption1-regular text-fg-neutral-muted mb-4">
+              <Text className="mb-4 caption1-regular text-fg-neutral-muted">
                 총 촬영횟수
               </Text>
               <Text className="body1-semiBold text-fg-brand">
@@ -290,7 +348,7 @@ export function ProfileView({
             <View className="w-1 h-40 mx-16 bg-stroke-divider-subtle" />
 
             <View className="items-center flex-1">
-              <Text className="caption1-regular text-fg-neutral-muted mb-4">
+              <Text className="mb-4 caption1-regular text-fg-neutral-muted">
                 총 촬영시간
               </Text>
               <Text className="body1-semiBold text-fg-brand">
@@ -301,7 +359,7 @@ export function ProfileView({
             <View className="w-1 h-40 mx-16 bg-stroke-divider-subtle" />
 
             <View className="items-center flex-1">
-              <Text className="caption1-regular text-fg-neutral-muted mb-4">
+              <Text className="mb-4 caption1-regular text-fg-neutral-muted">
                 평균매칭속도
               </Text>
               <Text className="body1-semiBold text-fg-brand">
@@ -318,39 +376,47 @@ export function ProfileView({
           variant="underline"
           contentClassName="justify-start items-start p-0"
         >
-          <TabItem name="intro" title="소개">
-            <View className="w-full py-20">
-              <Text className="body1-regular text-fg-neutral-solid">
-                {selectedProfile === "photographer"
-                  ? profile.photographerProfile?.introduction ||
-                    "작가 소개 내용이 여기에 표시됩니다."
-                  : profile.modelProfile?.introduction ||
-                    "모델 소개 내용이 여기에 표시됩니다."}
-              </Text>
-              <Text className="mt-12 body2-regular text-fg-neutral-muted">
-                자세한 프로필 정보와 소개글을 확인할 수 있습니다.
-              </Text>
-              <Text className="mt-16 body2-regular text-fg-neutral-muted">
-                추가 소개 내용이나 경력 사항, 전문 분야 등의 정보를 여기에
-                표시할 수 있습니다.
-              </Text>
+                     <TabItem name="intro" title="소개">
+             <View className="w-full py-20">
+               <Text className="body1-regular text-fg-neutral-solid">
+                 {selectedProfile === "photographer"
+                   ? profile?.photographerProfile?.introduction ||
+                     "작가 소개 내용이 여기에 표시됩니다."
+                   : profile?.modelProfile?.introduction ||
+                     "모델 소개 내용이 여기에 표시됩니다."}
+               </Text>
             </View>
           </TabItem>
 
           <TabItem name="projects" title="모집글">
             <View className="w-full py-20">
-              <Text className="body1-regular text-fg-neutral-solid">
-                {selectedProfile === "photographer"
-                  ? "작가가 올린"
-                  : "모델이 지원한"}{" "}
-                모집글 목록이 여기에 표시됩니다.
-              </Text>
-              <Text className="mt-12 body2-regular text-fg-neutral-muted">
-                진행 중인 프로젝트와 완료된 프로젝트를 확인할 수 있습니다.
-              </Text>
-              <Text className="mt-16 body2-regular text-fg-neutral-muted">
-                최근 활동한 프로젝트들의 목록과 상태를 여기서 볼 수 있습니다.
-              </Text>
+              {filteredProjects.length > 0 ? (
+                                 <FlatList
+                   data={filteredProjects}
+                   keyExtractor={(item) => item.id.toString()}
+                   renderItem={({ item }) => (
+                     <ProjectCard project={item} onPress={() => {}} />
+                   )}
+                   horizontal
+                   showsHorizontalScrollIndicator={false}
+                   contentContainerStyle={{ 
+                     gap: 16, 
+                     paddingHorizontal: 20,
+                     paddingVertical: 8
+                   }}
+                   className="flex-1"
+                 />
+              ) : (
+                <View className="items-center justify-center py-40">
+                  <FontAwesome name="folder-open" size={48} color="#999" />
+                  <Text className="mt-16 body1-regular text-fg-neutral-solid">
+                    {selectedProfile === "photographer" ? "작가" : "모델"}로 생성한 모집글이 없습니다
+                  </Text>
+                  <Text className="mt-8 body2-regular text-fg-neutral-muted">
+                    새로운 모집글을 만들어보세요
+                  </Text>
+                </View>
+              )}
             </View>
           </TabItem>
 
@@ -358,20 +424,14 @@ export function ProfileView({
             <View className="w-full py-20">
               <Text className="body1-regular text-fg-neutral-solid">
                 {selectedProfile === "photographer"
-                  ? "작가에 대한"
-                  : "모델에 대한"}{" "}
+                  ? "작가에 대한 "
+                  : "모델에 대한 "}
                 리뷰가 여기에 표시됩니다.
-              </Text>
-              <Text className="mt-12 body2-regular text-fg-neutral-muted">
-                다른 사용자들이 남긴 평가와 후기를 확인할 수 있습니다.
-              </Text>
-              <Text className="mt-16 body2-regular text-fg-neutral-muted">
-                평점과 함께 상세한 리뷰 내용들을 살펴볼 수 있습니다.
               </Text>
             </View>
           </TabItem>
-        </Tabs>
-      </View>
-    </ScrollView>
-  );
-}
+                 </Tabs>
+       </View>
+     </ScrollView>
+   );
+ }

@@ -52,7 +52,7 @@ export const useRegisterPushToken = () => {
           console.error("토큰 발급 중 오류 발생:", e);
         }
       } else {
-        alert("Must use physical device for Push Notifications");
+        //alert("Must use physical device for Push Notifications");
       }
     };
 

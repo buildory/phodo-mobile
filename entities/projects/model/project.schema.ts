@@ -32,46 +32,46 @@ export const ProjectSchema = z
       .string()
       .openapi({ example: "지금 여기서 촬영할 모델님을 구해요" }),
     description: z.string().nullable().optional().openapi({ example: null }),
-    user_id: z
+    userId: z
       .string()
       .openapi({ example: "0a48f1b7-6d5b-4771-bc15-9d30bd13312c" }),
-    created_at: z
+    createdAt: z
       .string()
       .openapi({ format: "date-time", example: "2025-06-03T01:17:49.869079" }),
-    availability_type: z.string().openapi({ example: "any" }),
-    available_days: z
+    availabilityType: z.string().openapi({ example: "any" }),
+    availableDays: z
       .array(z.string())
       .nullable()
       .optional()
       .openapi({ example: null }),
-    available_start_time: z
+    availableStartTime: z
       .string()
       .nullable()
       .optional()
       .openapi({ example: null }),
-    available_end_time: z
+    availableEndTime: z
       .string()
       .nullable()
       .optional()
       .openapi({ example: null }),
-    duration_hours: z.number().nullable().optional().openapi({ example: null }),
-    is_paid: z.boolean().openapi({ example: false }),
-    price_per_hour: z.number().nullable().optional().openapi({ example: null }),
+    durationHours: z.number().nullable().optional().openapi({ example: null }),
+    isPaid: z.boolean().openapi({ example: false }),
+    pricePerHour: z.number().nullable().optional().openapi({ example: null }),
     latitude: z.number().openapi({ example: 35.1796 }),
     longitude: z.number().openapi({ example: 129.0756 }),
-    location_address: z
+    locationAddress: z
       .string()
       .openapi({ example: "부산광역시 중구 중앙대로 1001" }),
-    input_location: z.string().openapi({ example: "부산광역시청" }),
-    device_source: z.string().openapi({ example: "model_device" }),
-    pin_display: z.string().openapi({ example: "bubble" }),
-    recruit_type: z
+    inputLocation: z.string().openapi({ example: "부산광역시청" }),
+    deviceSource: z.string().openapi({ example: "model_device" }),
+    pinDisplay: z.string().openapi({ example: "bubble" }),
+    recruitType: z
       .enum(["model", "photographer"])
       .openapi({ example: "model" }),
-    request_note: z.string().openapi({ example: "thanks" }),
+    requestNote: z.string().openapi({ example: "thanks" }),
     profiles: ProfileSchema,
-    project_categories: z.array(z.object({ categories: CategorySchema })),
-    project_devices: z.array(z.object({ devices: DeviceSchema })),
+    projectCategories: z.array(z.object({ categories: CategorySchema })),
+    projectDevices: z.array(z.object({ devices: DeviceSchema })),
   })
   .openapi("Project");
 
