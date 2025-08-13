@@ -1,17 +1,9 @@
 import { create } from 'zustand';
-
-interface CurrentUserProfile {
-  id: string;
-  email: string;
-  nickname: string;
-  gender: string;
-  profileImage: string;
-  pushToken: string;
-}
+import { ExtendedProfile } from './user.types';
 
 interface CurrentUserStore {
-  profile: CurrentUserProfile | null;
-  setProfile: (profile: CurrentUserProfile) => void;
+  profile: ExtendedProfile | null;
+  setProfile: (profile: ExtendedProfile) => void;
   clearProfile: () => void;
 }
 

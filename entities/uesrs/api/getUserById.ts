@@ -2,13 +2,8 @@ import { toCamel } from "@/shared/lib";
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { ExtendedProfile } from "../model/user.types";
 
-export const getCurrentUser = async (): Promise<ExtendedProfile | null> => {
+export const getUserById = async (userId: string): Promise<ExtendedProfile | null> => {
   const supabase = getSupabaseClient();
-
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData?.user?.id;
-  
-  if (!userId) throw new Error("유저 없음");
 
   const { data: profileData, error: profileError } = await supabase
     .from("profiles")
@@ -30,7 +25,6 @@ export const getCurrentUser = async (): Promise<ExtendedProfile | null> => {
   if (profileError) throw profileError;
   if (!profileData) return null;
 
-  console.log('profileData', profileData);
   // 데이터 변환 및 조합 (타입 안전성을 위해 any 사용)
   const data = profileData as any;
   const result: ExtendedProfile = {
