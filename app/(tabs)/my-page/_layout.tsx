@@ -6,7 +6,6 @@ export default function MyPageLayout() {
       <Stack.Screen name="index" options={{ title: "마이페이지" }} />
       <Stack.Screen name="edit-profile" options={{ title: "프로필 수정" }} />
       <Stack.Screen name="setting" options={{ title: "설정" }} />
-      <Stack.Screen name="[userId]" options={{ title: "프로필" }} />
     </Stack>
   );
 }

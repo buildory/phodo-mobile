@@ -40,7 +40,7 @@ export default function UserProfileScreen() {
             className="px-16 py-12 mt-24 bg-bg-brand rounded-8"
             onPress={() => router.back()}
           >
-            <Text className="body2-medium text-white">뒤로 가기</Text>
+            <Text className="text-white body2-medium">뒤로 가기</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -49,6 +49,8 @@ export default function UserProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg-layer-default">
+      {/* 상태바와 제목 사이에 여유 공간 추가 */}
+      <View className="mt-10" />
       <View className="flex-row items-center justify-between px-20 pt-20 pb-12">
         <TouchableOpacity 
           className="p-8"
@@ -56,7 +58,7 @@ export default function UserProfileScreen() {
         >
           <IconSymbol name="chevron.left" size={24} color="#333" />
         </TouchableOpacity>
-        <Text className="title2-bold text-fg-neutral-solid">프로필</Text>
+        <Text className="heading2-semiBold text-fg-neutral-solid">{`${userProfile?.nickname}님의 프로필`}</Text>
         {isOwnProfile ? (
           <TouchableOpacity 
             className="p-8"
@@ -75,4 +77,4 @@ export default function UserProfileScreen() {
       />
     </SafeAreaView>
   );
-}
+} 
