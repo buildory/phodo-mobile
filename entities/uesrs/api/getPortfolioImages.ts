@@ -39,11 +39,11 @@ export const getPortfolioImages = async (
         const storagePath = `${userId}/${profileType}/${file.name}`;
         const { data: { publicUrl } } = supabase.storage
           .from('portfolio-images')
-          .getPublicUrl(storagePath).data.publicUrl;
+          .getPublicUrl(storagePath);
 
         return {
           id: `${userId}_${profileType}_${index}`,
-          url: publicUrl,
+          url: publicUrl || '',
           name: file.name,
         };
       });
