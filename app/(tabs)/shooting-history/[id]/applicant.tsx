@@ -11,7 +11,6 @@ import { Tabs, TabItem } from "@/shared/ui/Tabs";
 import { Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import ApplicantCard from "@/features/projects/ui/ApplicantCard";
-import CancelledProjectCard from "@/features/projects/ui/CancelledProjectCard";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import { useProject } from "@/entities/projects/model";
 
@@ -82,18 +81,62 @@ export default function ApplicantScreen() {
             </KeyboardAvoidingView>
           </TabItem>
           <TabItem name="apply" title="진행중">
-            <View className="flex-1 justify-center items-center">
-              <Text className="heading1-semiBold text-fg-neutral-solid">
-                촬영 내역이 없어요
-              </Text>
-            </View>
+            <KeyboardAvoidingView
+              className="flex-1"
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+              {inProgressApplicants && inProgressApplicants.length > 0 ? (
+                <FlatList
+                  data={inProgressApplicants}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <ApplicantCard item={item} project={project} />
+                  )}
+                  contentContainerStyle={{
+                    gap: 20,
+                    paddingHorizontal: 8,
+                    paddingVertical: 20,
+                  }}
+                  keyboardShouldPersistTaps="always"
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <View className="flex-1 justify-center items-center">
+                  <Text className="heading1-semiBold text-fg-neutral-solid">
+                    촬영 내역이 없어요
+                  </Text>
+                </View>
+              )}
+            </KeyboardAvoidingView>
           </TabItem>
           <TabItem name="complete" title="완료">
-            <View className="flex-1 justify-center items-center">
-              <Text className="heading1-semiBold text-fg-neutral-solid">
-                촬영 내역이 없어요
-              </Text>
-            </View>
+            <KeyboardAvoidingView
+              className="flex-1"
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+              {doneApplicants && doneApplicants.length > 0 ? (
+                <FlatList
+                  data={doneApplicants}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <ApplicantCard item={item} project={project} />
+                  )}
+                  contentContainerStyle={{
+                    gap: 20,
+                    paddingHorizontal: 8,
+                    paddingVertical: 20,
+                  }}
+                  keyboardShouldPersistTaps="always"
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <View className="flex-1 justify-center items-center">
+                  <Text className="heading1-semiBold text-fg-neutral-solid">
+                    촬영 내역이 없어요
+                  </Text>
+                </View>
+              )}
+            </KeyboardAvoidingView>
           </TabItem>
           <TabItem name="cancel" title="취소">
             <KeyboardAvoidingView
@@ -105,7 +148,7 @@ export default function ApplicantScreen() {
                   data={canceledApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <CancelledProjectCard item={item} project={project}/>
+                    <ApplicantCard item={item} project={project}/>
                   )}
                   contentContainerStyle={{
                     gap: 20,

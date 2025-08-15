@@ -37,7 +37,7 @@ export default function ShootingHistoryScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
-      <View className="bg-bg-layer-baasement flex-1">
+      <View className="flex-1 bg-bg-layer-baasement">
         <Tabs variant="underline">
           <TabItem name="my" title="생성한 모집글">
             <KeyboardAvoidingView
