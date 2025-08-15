@@ -106,7 +106,7 @@ export default function SettingScreen() {
                 pathname: "/webview",
                 params: {
                   title: "채용",
-                  url: "https://recomplete.notion.site/246b542c84fa806da45cdd4ace4d2ca9",
+                  url: "https://www.notion.so/recomplete/246b542c84fa806da45cdd4ace4d2ca9",
                 },
               })
             }
