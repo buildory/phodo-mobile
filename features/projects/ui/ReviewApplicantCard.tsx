@@ -11,12 +11,13 @@ import ActionButton from "@/shared/ui/ActionButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import Feather from '@expo/vector-icons/Feather';
-interface CompletedApplicantCardProps {
+import { Picker } from "@react-native-picker/picker";
+interface ReviewApplicantCardProps {
   item: any;
   project: any;
 }
 
-export default function CompletedApplicantCard({ item, project }: CompletedApplicantCardProps) {
+export default function ReviewApplicantCard({ item, project }: ReviewApplicantCardProps) {
   const { navigateToChat } = useChatRoomOrCreate();
   
   return (
@@ -29,24 +30,33 @@ export default function CompletedApplicantCard({ item, project }: CompletedAppli
       </View>
         <View className="flex flex-row justify-between">
           <Text>{item?.applicant?.nickname}</Text>
+          <Pressable onPress={() => navigateToChat(item?.applicant?.id)}> 
+            <Text className="label1-regular text-fg-neutral-muted">채팅하기</Text>
+          </Pressable>
         </View>
         <View className="flex flex-row items-center gap-4">
           <IconSymbol name="camera" size={24} color="#1A1C20" />
           <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
           <Text className="label1-regular text-fg-neutral-solid">1시간 20분 진행</Text>
-          <Text className="label1-regular text-fg-neutral-muted ml-auto">상세보기</Text>
+          <Text className="label1-regular text-fg-info-solid ml-auto">1시간 30분</Text>
         </View>
         <View className="flex flex-row items-center gap-4">
           <SimpleLineIcons name="present" size={24} color="#1A1C20" />
           <Text className="label1-regular text-fg-neutral-muted">공유 방법</Text>
-          <Text className="label1-regular text-fg-neutral-solid">포도쉐어</Text>
+          <View className="border-stroke-divider-subtle border rounded-8 w-1/2 ml-auto">
+          <Picker
+              >
+                <Picker.Item label="포도쉐어" value="podoshare" />
+                <Picker.Item label="이메일" value="email" />
+                <Picker.Item label="기타매체" value="etc" />
+              </Picker>
+          </View>
         </View>
         <View className="flex flex-row items-center gap-4">
-          <AntDesign name="picture" size={24} color="#1A1C20" />
+          <AntDesign name="upload" size={24} color="#1A1C20" />
           <Text className="label1-regular text-fg-neutral-muted">공유 사진</Text>
           <Text className="label1-regular text-fg-neutral-solid">A1C2E3G4-01-0703.zip</Text>
-          <Feather name="download" size={24} color="#1A1C20" />
-          <Text className="label1-regular text-fg-info-solid ml-auto">23:59</Text>
+          <Text className="label1-regular text-fg-neutral-muted ml-auto">업로드</Text>
         </View>
       <ShootingPaymentInfo
         isPaid={item?.isPaid}
@@ -60,7 +70,7 @@ export default function CompletedApplicantCard({ item, project }: CompletedAppli
             variant={"primary"}
             title={"리뷰 작성"}
           />
-  <Text className="caption1-regular text-fg-neutral-muted">리뷰 작성 기간이 7일 남았어요.</Text>
+  <Text className="caption1-regular text-fg-neutral-muted">7일 후 자동으로 촬영 완료 처리돼요.</Text>
     </View>
   );
 } 
