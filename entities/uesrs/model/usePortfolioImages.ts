@@ -6,6 +6,9 @@ export const usePortfolioImages = (userId: string, profileType: 'photographer' |
     queryKey: ['portfolioImages', userId, profileType],
     queryFn: () => getPortfolioImages(userId, profileType),
     enabled: !!userId && !!profileType,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 

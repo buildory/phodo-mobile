@@ -59,4 +59,5 @@ export interface ExtendedProfile extends BaseProfile {
   modelProfile?: ModelProfile;
   profileSocialAccounts?: SocialAccount[];
   portfolioImages?: PortfolioImage[];
+  socialAccounts?: SocialAccount[];
 }

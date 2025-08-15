@@ -13,7 +13,12 @@ export const getPortfolioImages = async (
   const supabase = getSupabaseClient();
   
   try {
-    const folderPath = `${userId}/${profileType}`;
+    if (!userId || !profileType) {
+      console.warn('포트폴리오 이미지 조회: userId 또는 profileType이 없습니다.');
+      return [];
+    }
+
+    const folderPath = `${userId}/${profileType}`
 
     const { data, error } = await supabase.storage
       .from('portfolio-images')
@@ -32,7 +37,7 @@ export const getPortfolioImages = async (
       .filter(file => file.name && !file.name.startsWith('.'))
       .map((file, index) => {
         const storagePath = `${userId}/${profileType}/${file.name}`;
-        const publicUrl = supabase.storage
+        const { data: { publicUrl } } = supabase.storage
           .from('portfolio-images')
           .getPublicUrl(storagePath).data.publicUrl;
 
@@ -45,7 +50,11 @@ export const getPortfolioImages = async (
 
     return portfolioImages;
   } catch (error) {
-    console.error('포트폴리오 이미지 처리 중 오류:', error);
+    console.error('포트폴리오 이미지 처리 중 오류:', error)
+    if (error instanceof Error) {
+      console.error('에러 메시지:', error.message);
+      console.error('에러 스택:', error.stack);
+    }
     return [];
   }
 }; 

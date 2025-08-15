@@ -30,8 +30,6 @@ export const getCurrentUser = async (): Promise<ExtendedProfile | null> => {
   if (profileError) throw profileError;
   if (!profileData) return null;
 
-  console.log('profileData', profileData);
-  // 데이터 변환 및 조합 (타입 안전성을 위해 any 사용)
   const data = profileData as any;
   const result: ExtendedProfile = {
     ...toCamel(data),
