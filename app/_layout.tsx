@@ -4,11 +4,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { BackHandler } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth, ToastProvider, QueryProvider } from '@/shared/providers';
 import { useColorScheme } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { usePushNotificationListeners } from '@/shared/hooks/usePushNotificationListeners'
 import { useCurrentUser } from '@/entities/uesrs/model';
 import * as Notifications from 'expo-notifications';
@@ -40,6 +41,7 @@ export default function RootLayout() {
 function InnerLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const pathname = usePathname();
   useCurrentUser();
   usePushNotificationListeners();
 
@@ -72,6 +74,27 @@ function InnerLayout() {
       });
     }
   }, [ready, user]);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (pathname === '/' || 
+          pathname === '/shooting-history' || 
+          pathname === '/chat' || 
+          pathname === '/my-page') {
+        BackHandler.exitApp();
+        return true;
+      }
+      
+      if (pathname.startsWith('/chat/') && pathname !== '/chat') {
+        router.replace('/chat');
+        return true;
+      }
+    
+      return false;
+    });
+    
+    return () => backHandler.remove();
+  }, [pathname, router]);
 
   if (!ready) {
     return null;
