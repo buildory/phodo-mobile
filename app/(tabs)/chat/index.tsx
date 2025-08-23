@@ -39,6 +39,7 @@ export default function ChatListScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg-layer-default">
       <FlatList
+        className="mt-20"
         data={chatRooms}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -47,9 +48,8 @@ export default function ChatListScreen() {
             onPress={() => handleChatRoomPress(item.id)}
           />
         )}
-        contentContainerStyle={{ padding: 16 }}
         ItemSeparatorComponent={() => <View className="h-8" />}
       />
     </SafeAreaView>
   );
-} 
+}
