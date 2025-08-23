@@ -10,8 +10,8 @@ export const getChatRooms = async (userId: string) => {
     .select(
       `
       *,
-      user1:profiles!chat_rooms_user1_id_fkey(id, nickname),
-      user2:profiles!chat_rooms_user2_id_fkey(id, nickname)
+      user1:profiles!chat_rooms_user1_id_fkey(id, nickname, profile_image),
+      user2:profiles!chat_rooms_user2_id_fkey(id, nickname, profile_image)
     `
     )
     .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
@@ -30,6 +30,10 @@ export const getChatRooms = async (userId: string) => {
       partnerId: partner.id,
       partnerName: partner.nickname,
       profileImage: partner.profileImage,
+      lastMessage: room.lastMessage,
+      lastMessageTime: room.lastMessageTime,
+      lastMessageSenderId: room.lastMessageSenderId,
+      unreadCount: room.unreadCount,
     };
   });
 

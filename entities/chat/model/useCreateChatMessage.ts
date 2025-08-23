@@ -1,22 +1,37 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createChatMessage, CreateChatMessageParams } from '../api/createChatMessage';
+import { useCreateNotification } from '@/entities/notification/model/useCreateNotification';
+import { useCurrentUserStore } from '@/entities/uesrs/model/useCurrentUserStore';
+import { CreateChatMessageWithNotificationParams } from './chat.types';
 
 export const useCreateChatMessage = () => {
   const queryClient = useQueryClient();
+  const { mutate: createNotification } = useCreateNotification();
+  const { profile } = useCurrentUserStore();
 
   return useMutation({
-    mutationFn: (params: CreateChatMessageParams) => createChatMessage(params),
-    onSuccess: (data, variables) => {
-      // 해당 채팅방의 메시지 목록 새로고침
+    mutationFn: (params: CreateChatMessageWithNotificationParams) => createChatMessage(params),
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ 
         queryKey: ['chatMessages', variables.chatRoomId] 
       });
       
-      // 채팅방 목록도 새로고침 (마지막 메시지 업데이트를 위해)
       queryClient.invalidateQueries({ 
         queryKey: ['chatRooms'] 
       });
+
+      if (variables.notificationInfo && profile?.id) {
+        createNotification({
+          title: profile.nickname || "알 수 없음",
+          body: variables.content || "알 수 없음",
+          userId: variables.notificationInfo.partnerId,
+          data: { 
+            type: "chat", 
+            chatRoomId: variables.chatRoomId,
+            senderId: profile.id 
+          },
+        });
+      }
     },
   });
 };
-

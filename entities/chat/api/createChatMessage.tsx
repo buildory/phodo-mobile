@@ -9,8 +9,8 @@ export interface CreateChatMessageParams {
 
 export const createChatMessage = async (params: CreateChatMessageParams) => {
   const supabase = getSupabaseClient();
-  
-  const { data, error } = await supabase
+
+  const { data: messageData, error: messageError } = await supabase
     .from("chat_messages")
     .insert(toSnake({
       chatRoomId: params.chatRoomId,
@@ -21,7 +21,19 @@ export const createChatMessage = async (params: CreateChatMessageParams) => {
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (messageError) throw messageError;
+
+  const { error: roomError } = await supabase
+    .from("chat_rooms")
+    .update(toSnake({
+      lastMessage: params.content,
+      lastMessageTime: new Date().toISOString(),
+      lastMessageSenderId: params.senderId,
+    }))
+    .eq("id", params.chatRoomId);
+
+  if (roomError) throw roomError;
+
+  return messageData;
 };
 

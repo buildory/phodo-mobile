@@ -5,6 +5,10 @@ export const ChatRoomSchema = z.object({
   user1Id: z.string(),
   user2Id: z.string(),
   createdAt: z.date(),
+  lastMessage: z.string().nullable().optional(),
+  lastMessageTime: z.date().nullable().optional(),
+  lastMessageSenderId: z.string().nullable().optional(),
+  unreadCount: z.number().nullable().optional(),
 });
 
 export const CreateChatRoomParamsSchema = ChatRoomSchema.omit({
