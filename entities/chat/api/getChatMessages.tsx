@@ -1,24 +1,34 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { toCamel } from "@/shared/lib";
-import { ChatRoomWithUsers } from "../model/chat.types";
 
-export const getChatMessages = async (chatRoomId: string) => {
+export const getChatMessages = async (chatRoomId: string, limit: number = 20) => {
+  if (!chatRoomId) {
+    throw new Error('chatRoomId is required');
+  }
+
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("chat_messages")
     .select(
       `
       *,
-    sender:profiles(id, nickname, profile_image)
-  `
+      sender:profiles(id, nickname, profile_image)
+    `
     )
     .eq("chat_room_id", chatRoomId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  const { data, error } = await query;
 
   if (error) throw error;
 
   const messages = toCamel(data);
-
-  return messages;
+   
+  if (!messages || !Array.isArray(messages)) {
+    return [];
+  }
+  
+  return messages.reverse();
 };
