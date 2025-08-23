@@ -12,3 +12,9 @@ export type CreateChatRoomParams = z.infer<typeof CreateChatRoomParamsSchema>;
 export type ChatRoomWithUsers = z.infer<typeof ChatRoomWithUsersSchema>;
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export type CreateChatMessageParams = z.infer<typeof CreateChatMessageParamsSchema>;
+export interface CreateChatMessageWithNotificationParams extends CreateChatMessageParams {
+  notificationInfo?: {
+    partnerId: string;
+    partnerName?: string;
+  };
+}
