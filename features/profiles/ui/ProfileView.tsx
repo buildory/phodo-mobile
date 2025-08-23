@@ -17,6 +17,7 @@ import { ExtendedProfile } from "@/entities/uesrs/model/user.types";
 import { useMyProjects } from "@/entities/projects/model";
 import { ProjectCard } from "@/features/projects/ui/ProjectCard";
 import { usePortfolioImages, PortfolioImage } from "@/entities/uesrs/model";
+import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -162,39 +163,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
             className="absolute rounded-full left-16 border-gray-40"
             style={{ bottom: -30 }}
           >
-            <View
-              className="p-2 bg-white rounded-full"
-              style={{ width: 80, height: 80 }}
-            >
-              <View className="items-center justify-center flex-1 rounded-full bg-bg-layer-subtle">
-                {profile?.profileImage ? (
-                  <Image
-                    source={{ uri: profile.profileImage }}
-                    className="w-full h-full rounded-full"
-                  />
-                ) : (
-                  <View
-                    style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: 32,
-                      backgroundColor: "#F3F0FF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderWidth: 2,
-                      borderColor: "#E0D7FB",
-                      shadowColor: "#9E77ED",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.12,
-                      shadowRadius: 6,
-                      elevation: 2,
-                    }}
-                  >
-                    <FontAwesome name="user" size={32} color="#B39DDB" />
-                  </View>
-                )}
-              </View>
-            </View>
+            <UserAvatar size={64} imageUrl={profile?.profileImage} nickname={profile?.nickname} />
           </View>
         </View>
 
