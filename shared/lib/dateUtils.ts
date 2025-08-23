@@ -48,3 +48,14 @@ export const formatDateWithRelative = (
   const base = dayjs.utc(utcDate).tz(DEFAULT_TIMEZONE);
   return `${base.format(format)} · ${base.fromNow()}`;
 };
+
+/**
+ * KST 기준으로 날짜와 시간을 합쳐서 포맷 (e.g. "7월 16일 오후 1:30", "8월 16일 오전 10:00")
+ */
+export const formatDateTime = (
+  utcDate: string | Date,
+  format = "M월 D일 A h:mm"
+): string => {
+  return dayjs.utc(utcDate).tz(DEFAULT_TIMEZONE).format(format);
+};
+
