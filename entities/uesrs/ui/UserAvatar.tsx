@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Image, Text, View } from "react-native"
 
 export const DEFAULT_AVATARS = {
@@ -67,8 +68,9 @@ interface UserAvatarProps {
 export const UserAvatar = ({ nickname = "?", size, imageUrl }: UserAvatarProps) => {
   const isUrl = imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
   const isDefaultAvatar = imageUrl && DEFAULT_AVATAR_NAMES.includes(imageUrl as any);
+  const [imageError, setImageError] = useState(false);
 
-  if (isUrl) {
+  if (isUrl && !imageError) {
     return (
       <View className="relative">
         <Image
@@ -79,6 +81,7 @@ export const UserAvatar = ({ nickname = "?", size, imageUrl }: UserAvatarProps) 
             height: size,
             borderRadius: size / 2,
           }}
+          onError={() => setImageError(true)}
         />
       </View>
     );
