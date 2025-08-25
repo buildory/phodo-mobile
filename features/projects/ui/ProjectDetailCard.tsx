@@ -83,7 +83,7 @@ function formatTime(timeString: string) {
   return parsed.locale("ko").format("A h:mm");
 }
 
-export default function ProjectDetailCard({ project }) {
+export default function ProjectDetailCard({ project, reviewCount }) {
   return (
     <View className="p-12 gap-8 flex-1">
       <View className="flex flex-row items-center gap-6">
@@ -199,7 +199,7 @@ export default function ProjectDetailCard({ project }) {
           </View>
           <View className="flex flex-row items-center gap-2">
             <Text className="caption2-regular">리뷰</Text>
-            <Text className="caption2-regular">0</Text>
+            <Text className="caption2-regular">{reviewCount}</Text>
           </View>
         </View>
       </View>
