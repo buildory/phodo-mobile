@@ -44,14 +44,14 @@ export interface SocialAccount {
 
 export interface PortfolioImage {
   id: string;
-  user_id: string;
-  profile_type: 'photographer' | 'model';
-  image_url: string;
-  image_order: number;
+  userId: string;
+  profileType: 'photographer' | 'model';
+  imageUrl: string;
+  imageOrder: number;
   title?: string;
   description?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ExtendedProfile extends BaseProfile {

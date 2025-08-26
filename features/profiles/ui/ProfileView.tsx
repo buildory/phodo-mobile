@@ -156,7 +156,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                             height: "100%",
                           }}
                           source={{
-                            uri: image.url,
+                            uri: image.imageUrl,
                             cache: "force-cache",
                           }}
                           className="w-full h-full"

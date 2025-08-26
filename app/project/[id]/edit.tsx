@@ -278,7 +278,7 @@ export default function ProjectEditScreen() {
                             }}
                           >
                             <Image
-                              source={{ uri: image.url }}
+                              source={{ uri: image.imageUrl }}
                               className="w-full h-full rounded-8"
                               resizeMode="cover"
                             />
