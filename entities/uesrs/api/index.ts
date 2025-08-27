@@ -4,4 +4,3 @@ export { createProfile } from "./createProfile";
 export { updateProfile } from "./updateProfile";
 export { getPortfolioImages } from "./getPortfolioImages";
 export { uploadPortfolioImage } from "./uploadPortfolioImage";
-export { deletePortfolioImage } from "./deletePortfolioImage";

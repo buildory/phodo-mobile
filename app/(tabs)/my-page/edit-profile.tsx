@@ -19,7 +19,6 @@ import { useUpdateProfile } from "@/entities/uesrs/model";
 import { useUpdatePhotographerProfile } from "@/entities/uesrs/model";
 import { useUpdateModelProfile } from "@/entities/uesrs/model";
 import { useUploadPortfolioImage } from "@/entities/uesrs/model";
-import { useUpdatePortfolioImage } from "@/entities/uesrs/model";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
 import LongButton from "@/shared/ui/Button";
 import { useFormValidator } from "@/shared/hooks/useFormValidator";
@@ -63,7 +62,6 @@ export default function EditProfileScreen() {
   const updatePhotographerProfile = useUpdatePhotographerProfile();
   const updateModelProfile = useUpdateModelProfile();
   const uploadPortfolioImage = useUploadPortfolioImage();
-  const updatePortfolioImage = useUpdatePortfolioImage();
 
   const [isLoading, setIsLoading] = useState(false);
   const [photographerImages, setPhotographerImages] = useState<
@@ -179,8 +177,8 @@ export default function EditProfileScreen() {
             기본 정보
           </Text>
           <View className="mt-12">
-            <Text className="label1-medium mt-4">닉네임</Text>
-            <Text className="caption1-regular text-fg-neutral-muted my-8">
+            <Text className="mt-4 label1-medium">닉네임</Text>
+            <Text className="my-8 caption1-regular text-fg-neutral-muted">
               너무 자주 바꾸면 나를 알아보기 어려워질 수 있어요.
             </Text>
             <ValidatedInput
@@ -193,8 +191,8 @@ export default function EditProfileScreen() {
 
           {/* 성별 선택 */}
           <View className="mt-12">
-            <Text className="label1-medium mt-4">성별</Text>
-            <Text className="caption1-regular text-fg-neutral-muted my-8">
+            <Text className="mt-4 label1-medium">성별</Text>
+            <Text className="my-8 caption1-regular text-fg-neutral-muted">
               상대에게 신뢰를 줄 수 있도록 정확히 선택해주세요.
             </Text>
             <View className="flex-row gap-12">
@@ -220,7 +218,7 @@ export default function EditProfileScreen() {
           </View>
 
           {/* 프로필 사진 */}
-          <Text className="label1-medium mt-4">프로필 사진</Text>
+          <Text className="mt-4 label1-medium">프로필 사진</Text>
           <ProfileImagePicker
             imageUri={values.profileImage}
             onImageChange={(imageUri) => setValue("profileImage", imageUri)}
@@ -231,10 +229,10 @@ export default function EditProfileScreen() {
 
           {/* SNS 입력 */}
           <View className="mt-12">
-            <Text className="text-base font-medium mb-12">SNS 계정</Text>
+            <Text className="mb-12 text-base font-medium">SNS 계정</Text>
             <View className="space-y-12">
               <View>
-                <Text className="text-sm text-gray-600 mb-4">Instagram</Text>
+                <Text className="mb-4 text-sm text-gray-600">Instagram</Text>
                 <ValidatedInput
                   placeholder="Instagram URL을 입력해주세요"
                   value={values.instagramUrl}
@@ -242,7 +240,7 @@ export default function EditProfileScreen() {
                 />
               </View>
               <View>
-                <Text className="text-sm text-gray-600 mb-4">YouTube</Text>
+                <Text className="mb-4 text-sm text-gray-600">YouTube</Text>
                 <ValidatedInput
                   placeholder="YouTube URL을 입력해주세요"
                   value={values.youtubeUrl}
@@ -250,7 +248,7 @@ export default function EditProfileScreen() {
                 />
               </View>
               <View>
-                <Text className="text-sm text-gray-600 mb-4">
+                <Text className="mb-4 text-sm text-gray-600">
                   기타 웹사이트
                 </Text>
                 <ValidatedInput
@@ -264,7 +262,7 @@ export default function EditProfileScreen() {
 
           {/* 탭 메뉴 - 작가/모델 */}
           <View className="mb-32">
-          <Text className="heading2-semiBold text-fg-neutral-solid mt-16">
+          <Text className="mt-16 heading2-semiBold text-fg-neutral-solid">
             역할 정보
           </Text>
             <Tabs
@@ -289,7 +287,7 @@ export default function EditProfileScreen() {
 
                   {/* 작가 소개 입력 */}
                   <View>
-                    <Text className="text-base font-medium mb-12">
+                    <Text className="mb-12 text-base font-medium">
                       작가 소개
                     </Text>
                     <ValidatedInput
@@ -324,7 +322,7 @@ export default function EditProfileScreen() {
 
                   {/* 모델 소개 입력 */}
                   <View>
-                    <Text className="text-base font-medium mb-12">
+                    <Text className="mb-12 text-base font-medium">
                       모델 소개
                     </Text>
                     <ValidatedInput
