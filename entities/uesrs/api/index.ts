@@ -1,6 +1,14 @@
 export { getCurrentUser } from "./getCurrentUser";
 export { getUserById } from "./getUserById";
-export { createProfile } from "./createProfile";
+export { getUserByEmail } from "./getUserByEmail";
 export { updateProfile } from "./updateProfile";
+export { uploadProfileImage } from "./uploadProfileImage";
 export { getPortfolioImages } from "./getPortfolioImages";
 export { uploadPortfolioImage } from "./uploadPortfolioImage";
+export { deletePortfolioImage } from "./deletePortfolioImage";
+export { updatePortfolioImage } from "./updatePortfolioImage";
+export { updatePhotographerProfile } from "./updatePhotographerProfile";
+export { updateModelProfile } from "./updateModelProfile";
+export { createProfile } from "./createProfile";
+export { getReviews } from "./getReviews";
+export { getReviewStats } from "./getReviewStats";
