@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPortfolioImages, PortfolioImage } from '../api/getPortfolioImages';
+import { getPortfolioImages } from '../api/getPortfolioImages';
+import { PortfolioImage } from './user.types';
 
 export const usePortfolioImages = (userId: string, profileType: 'photographer' | 'model') => {
   return useQuery({
@@ -12,4 +13,4 @@ export const usePortfolioImages = (userId: string, profileType: 'photographer' |
   });
 };
 
-export type { PortfolioImage }; 
+export type { PortfolioImage };

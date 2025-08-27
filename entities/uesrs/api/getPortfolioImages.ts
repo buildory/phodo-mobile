@@ -1,11 +1,7 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
-
-export interface PortfolioImage {
-  id: string;
-  url: string;
-  name: string;
-}
-
+import { PortfolioImage } from "../model/user.types";
+  import { toCamel } from "@/shared/lib";
+  
 export const getPortfolioImages = async (
   userId: string,
   profileType: 'photographer' | 'model'
@@ -18,11 +14,12 @@ export const getPortfolioImages = async (
       return [];
     }
 
-    const folderPath = `${userId}/${profileType}`
-
-    const { data, error } = await supabase.storage
-      .from('portfolio-images')
-      .list(folderPath);
+    const { data, error } = await supabase
+      .from('portfolio_images')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('type', profileType)
+      .order('order_index', { ascending: true });
 
     if (error) {
       console.error('포트폴리오 이미지 조회 실패:', error);
@@ -33,22 +30,7 @@ export const getPortfolioImages = async (
       return [];
     }
 
-    const portfolioImages: PortfolioImage[] = data
-      .filter(file => file.name && !file.name.startsWith('.'))
-      .map((file, index) => {
-        const storagePath = `${userId}/${profileType}/${file.name}`;
-        const { data: { publicUrl } } = supabase.storage
-          .from('portfolio-images')
-          .getPublicUrl(storagePath);
-
-        return {
-          id: `${userId}_${profileType}_${index}`,
-          url: publicUrl || '',
-          name: file.name,
-        };
-      });
-
-    return portfolioImages;
+    return toCamel(data);
   } catch (error) {
     console.error('포트폴리오 이미지 처리 중 오류:', error)
     if (error instanceof Error) {

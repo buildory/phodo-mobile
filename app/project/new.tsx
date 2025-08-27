@@ -17,10 +17,11 @@ import { Picker } from "@react-native-picker/picker";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import LongButton from "@/shared/ui/Button";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
+import { PortfolioImagePicker } from "@/entities/uesrs/ui/PortfolioImagePicker";
 import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import Badge from "@/shared/ui/Badge";
 import { useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
+
 import { Calendar } from "react-native-calendars";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -94,25 +95,7 @@ export default function CreateProjectPage() {
 
   dayjs.extend(isSameOrBefore);
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      console.log("권한 필요", "사진 접근 권한이 필요합니다.");
-      return;
-    }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.8,
-      selectionLimit: 3 - images.length,
-      allowsMultipleSelection: true,
-    });
-
-    if (!result.canceled) {
-      const newUris = result.assets.map((a) => a.uri);
-      setImages((prev) => [...prev, ...newUris].slice(0, 3));
-    }
-  };
 
   const onDayPress = (day) => {
     if (form.dateMode === "single") {
@@ -847,40 +830,13 @@ export default function CreateProjectPage() {
                 이런 느낌이면 좋겠어요 :) 1~3장만 올려주세요
               </Text>
 
-              <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8, paddingRight: 8 }}
-                style={{ marginTop: 16 }}
-              >
-                <Pressable
-                  style={{
-                    width: 100,
-                    height: 100,
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  onPress={pickImage}
-                >
-                  <IconSymbol size={32} name="camera" color={"#181D27"} />
-                  <Text style={{ color: "#A4A7AE" }}>{images.length} / 3</Text>
-                </Pressable>
-                {images.map((img, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    onLongPress={() => {
-                      setImages(images.filter((_, i) => i !== idx));
-                    }}
-                  >
-                    <Image
-                      source={{ uri: img }}
-                      style={{ width: 100, height: 100, borderRadius: 8 }}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+              <PortfolioImagePicker
+                images={images}
+                onImagesChange={setImages}
+                maxImages={3}
+                title="컨셉 이미지"
+                description="촬영하고 싶은 컨셉 이미지를 추가해주세요"
+              />
               <Text
                 style={{ fontSize: 16, fontWeight: "bold", marginBottom: 16 }}
               >

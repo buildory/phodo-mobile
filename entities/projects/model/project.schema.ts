@@ -72,6 +72,7 @@ export const ProjectSchema = z
     profiles: ProfileSchema,
     projectCategories: z.array(z.object({ categories: CategorySchema })),
     projectDevices: z.array(z.object({ devices: DeviceSchema })),
+    reviewCount: z.number().optional().openapi({ example: 0 }),
   })
   .openapi("Project");
 

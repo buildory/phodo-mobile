@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useReviews, useReviewStats } from "@/entities/uesrs/model/useReviews";
+import { ReviewStats, ReviewList } from "@/entities/uesrs/ui";
 import {
   View,
   Text,
@@ -30,9 +33,11 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
+  const router = useRouter();
   const [selectedProfile, setSelectedProfile] =
     useState<ProfileType>("photographer");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reviewType, setReviewType] = useState<'MODEL' | 'PHOTOGRAPHER'>('PHOTOGRAPHER');
 
   const { data: myProjects } = useMyProjects(profile?.id ?? "");
   const filteredProjects =
@@ -46,6 +51,20 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
   // 포트폴리오 이미지들 가져오기
   const { data: portfolioImages, isLoading: portfolioLoading, error: portfolioError } =
     usePortfolioImages(profile?.id ?? "", selectedProfile);
+
+  // 리뷰 데이터 가져오기
+  const { data: reviews, isLoading: reviewsLoading } = useReviews({
+    userId: profile?.id ?? "",
+    type: reviewType,
+    limit: 20,
+    offset: 0
+  });
+
+  // 리뷰 통계 가져오기
+  const { data: reviewStats } = useReviewStats({
+    userId: profile?.id ?? "",
+    type: reviewType
+  });
 
   // 포트폴리오 이미지 메모이제이션
   const memoizedPortfolioImages = useMemo(() => {
@@ -61,6 +80,11 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [memoizedPortfolioImages]);
+
+  // 선택된 프로필이 변경될 때 리뷰 타입도 함께 변경
+  useEffect(() => {
+    setReviewType(selectedProfile === 'photographer' ? 'PHOTOGRAPHER' : 'MODEL');
+  }, [selectedProfile]);
 
   const getStats = (type: ProfileType) => {
     if (type === "photographer" && profile?.photographerProfile) {
@@ -132,7 +156,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                             height: "100%",
                           }}
                           source={{
-                            uri: image.url,
+                            uri: image.imageUrl,
                             cache: "force-cache",
                           }}
                           className="w-full h-full"
@@ -222,7 +246,10 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
           {/* 프로필 수정 버튼 - 본인 프로필일 때만 표시 */}
           {isOwnProfile && (
             <View className="w-full px-16 mt-8">
-              <TouchableOpacity className="flex-row justify-center bg-bg-neutral-weak px-14 py-9 rounded-10">
+              <TouchableOpacity 
+                className="flex-row justify-center bg-bg-neutral-weak px-14 py-9 rounded-10"
+                onPress={() => router.push("/my-page/edit-profile")}
+              >
                 <Text className="body2-semiBold text-fg-neutral-muted ">
                   {`프로필 수정`}
                 </Text>
@@ -437,13 +464,22 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
           </TabItem>
 
           <TabItem name="reviews" title="리뷰">
-            <View className="w-full py-20">
-              <Text className="body1-regular text-fg-neutral-solid">
-                {selectedProfile === "photographer"
-                  ? "작가에 대한 "
-                  : "모델에 대한 "}
-                리뷰가 여기에 표시됩니다.
-              </Text>
+            <View className="w-full ">
+            <Text className="heading2-semiBold text-fg-neutral-solid mt-16">리뷰</Text>
+              {reviewStats && reviewStats.totalReviews > 0 && (
+                <ReviewStats 
+                  stats={reviewStats}
+                />
+              )}
+
+              {/* 리뷰 목록 */}
+              <ReviewList
+                reviews={reviews || []}
+                isLoading={reviewsLoading}
+                type={reviewType}
+                onTypeChange={setReviewType}
+                hasMore={false}
+              />
             </View>
           </TabItem>
         </Tabs>

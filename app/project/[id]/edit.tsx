@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Text,
   View,
@@ -7,6 +7,8 @@ import {
   Pressable,
   StatusBar,
   Image,
+  Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import {
   NaverMapView,
@@ -28,6 +30,13 @@ import { useWatchLocation } from "@/features/projects/model/useWatchLocation";
 import type { Applicant } from "@/entities/projects/model";
 import { useToast } from "@/shared/hooks/useToast";
 import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
+import { ReviewStats } from "@/entities/uesrs/ui";
+import { useReviewStats } from "@/entities/uesrs/model/useReviews";
+import { PortfolioImage, usePortfolioImages } from "@/entities/uesrs/model/usePortfolioImages";
+import { FontAwesome } from "@expo/vector-icons";
+
+const { width: screenWidth } = Dimensions.get("window");
+
 
 export default function ProjectEditScreen() {
   const { id } = useLocalSearchParams();
@@ -39,7 +48,15 @@ export default function ProjectEditScreen() {
   const { mutate: createNotification } = useCreateNotification();
   const myLocation = useWatchLocation();
   const [alreadyApplied, setAlreadyApplied] = useState(false);
-  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { data: reviewStats } = useReviewStats({
+    userId: profile?.id ?? "",
+    type: project?.recruitType === "model" ? "PHOTOGRAPHER" : "MODEL"
+  });
+
+  const { data: portfolioImages, isLoading: portfolioLoading, error: portfolioError } =
+  usePortfolioImages(profile?.id ?? "", project?.recruitType === "model" ? "model" : "photographer");
+
   const distance =
     myLocation?.latitude != null &&
     myLocation?.longitude != null &&
@@ -120,6 +137,21 @@ export default function ProjectEditScreen() {
     );
   };
 
+    // 포트폴리오 이미지 메모이제이션
+    const memoizedPortfolioImages = useMemo(() => {
+      // 에러가 발생하면 빈 배열 반환
+      if (portfolioError) {
+        console.warn('포트폴리오 이미지 로딩 에러:', portfolioError);
+        return [];
+      }
+      return portfolioImages || [];
+    }, [portfolioImages, portfolioError]) as PortfolioImage[];
+  
+    // 이미지 인덱스가 변경될 때 currentImageIndex 업데이트
+    useEffect(() => {
+      setCurrentImageIndex(0);
+    }, [memoizedPortfolioImages]);
+
   return (
     <View style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
       <Pressable
@@ -131,7 +163,7 @@ export default function ProjectEditScreen() {
       <ScrollView>
         <View style={{ flex: 1, paddingHorizontal: 16 }}>
           {!isLoading && (
-            <ProjectDetailCard project={{ ...project, distance }} />
+            <ProjectDetailCard project={{ ...project, distance }} reviewCount={reviewStats?.totalReviews ?? 0} />
           )}
         </View>
 
@@ -223,10 +255,69 @@ export default function ProjectEditScreen() {
               </ScrollView>
             </TabItem>
             <TabItem name="profile" title="프로필">
-              <Text></Text>
+              <View className="w-full py-20 min-h-[400px]">
+                {portfolioLoading ? (
+                  <View className="items-center justify-center py-40">
+                    <ActivityIndicator size="large" color="#9E77ED" />
+                    <Text className="mt-16 body2-regular text-fg-brand">
+                      포트폴리오 로딩 중...
+                    </Text>
+                  </View>
+                ) : memoizedPortfolioImages.length > 0 ? (
+                  <View className="w-full">
+                    <View className="flex-row flex-wrap justify-between">
+                      {memoizedPortfolioImages.slice(0, 6).map((image, index) => {
+                        const imageSize = (screenWidth - 80) / 2; // 2열 그리드
+                        return (
+                          <View 
+                            key={image.id} 
+                            className="mb-8"
+                            style={{ 
+                              width: imageSize,
+                              height: imageSize
+                            }}
+                          >
+                            <Image
+                              source={{ uri: image.imageUrl }}
+                              className="w-full h-full rounded-8"
+                              resizeMode="cover"
+                            />
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ) : (
+                  <View className="items-center justify-center py-40">
+                    <FontAwesome name="camera" size={48} color="#999" />
+                    <Text className="mt-16 body1-regular text-fg-neutral-solid">
+                      포트폴리오 이미지가 없습니다
+                    </Text>
+                    <Text className="mt-8 body2-regular text-fg-neutral-muted">
+                      {project?.recruitType === "model" ? "모델" : "작가"} 포트폴리오를 등록해보세요
+                    </Text>
+                  </View>
+                )}
+              </View>
             </TabItem>
             <TabItem name="review" title="리뷰">
-              <Text></Text>
+              <View className="mt-16 flex flex-row items-center justify-between">
+                <Text className="heading2-semiBold text-fg-neutral-solid">리뷰</Text>
+                {reviewStats && reviewStats.totalReviews > 0 && (
+                  <Text className="label1-semiBold text-fg-neutral-muted">모든 리뷰 보기</Text>
+                )}
+              </View>
+            {reviewStats && reviewStats.totalReviews > 0 ? (
+                <ReviewStats 
+                  stats={reviewStats}
+                />
+              ) : (
+                <View className="py-32 items-center">
+                <Text className="text-gray-500 text-base">
+                  아직 리뷰가 없습니다.
+                </Text>
+              </View>
+              )}
             </TabItem>
           </Tabs>
         </View>
@@ -236,12 +327,14 @@ export default function ProjectEditScreen() {
           <LongButton
             onPress={() => router.push("/(tabs)/shooting-history")}
             title={"상세 현황 보기"}
+            loading={false}
           />
         ) : (
           <LongButton
             disabled={alreadyApplied}
             onPress={() => handleApplicant()}
             title={alreadyApplied ? "지원 완료" : "지원하기"}
+            loading={false}
           />
         )}
       </View>
