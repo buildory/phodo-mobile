@@ -4,6 +4,7 @@ import { copyToClipboard } from "@/shared/lib/clipboard";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import { Project } from "@/entities/projects/model";
 dayjs.locale("ko");
 
 export const COOPERATION_OPTIONS = [
@@ -83,17 +84,21 @@ function formatTime(timeString: string) {
   return parsed.locale("ko").format("A h:mm");
 }
 
-export default function ProjectDetailCard({ project, reviewCount }) {
+interface ProjectDetailCardProps {
+  project: Project;
+}
+
+export default function ProjectDetailCard({ project }: ProjectDetailCardProps) {
   return (
-    <View className="p-12 gap-8 flex-1">
+    <View className="flex-1 gap-8 p-12">
       <View className="flex flex-row items-center gap-6">
         <Badge
           label={project.recruitType === "model" ? "모델 구인" : "작가 구인"}
-          className="border-stroke-field border rounded-4"
+          className="border border-stroke-field rounded-4"
         />
         <Badge
           label={project.pinDisplay === "always" ? "상시 촬영" : "버블 촬영"}
-          className="border-stroke-field border rounded-4"
+          className="border border-stroke-field rounded-4"
         />
       </View>
       <Pressable>
@@ -127,7 +132,7 @@ export default function ProjectDetailCard({ project, reviewCount }) {
           onPress={() => copyToClipboard(project.locationAddress)}
           className="flex flex-row items-center"
         >
-          <Text className="label1-regular mr-4">{project.inputLocation}</Text>
+          <Text className="mr-4 label1-regular">{project.inputLocation}</Text>
           <IconSymbol size={12} name="copy" color="#000" />
         </Pressable>
       </View>
@@ -152,9 +157,9 @@ export default function ProjectDetailCard({ project, reviewCount }) {
         </Text>
       </View>
 
-      <View className="flex flex-row gap-2 items-center">
+      <View className="flex flex-row items-center gap-2">
         <Text className="caption2-regular">촬영 분야</Text>
-        <View className="flex flex-row gap-2 w-2/3 flex-wrap">
+        <View className="flex flex-row flex-wrap w-2/3 gap-2">
           {project.projectCategories.map((categoryWrapper) => (
             <Badge
               size="sm"
@@ -165,18 +170,18 @@ export default function ProjectDetailCard({ project, reviewCount }) {
           ))}
         </View>
       </View>
-      <View className="flex flex-row gap-2 items-center">
+      <View className="flex flex-row items-center gap-2">
         <Text className="caption2-regular">촬영 방식</Text>
-        <View className="flex flex-row gap-2 items-center w-2/3 flex-wrap">
+        <View className="flex flex-row flex-wrap items-center w-2/3 gap-2">
           <Badge
             label={SHOOTING_PREFERENCE_LABELS[project.deviceSource]}
             icon={<IconSymbol size={12} name="hash" color={"#000"} />}
           />
         </View>
       </View>
-      <View className="flex flex-row gap-2 items-center">
+      <View className="flex flex-row items-center gap-2">
         <Text className="caption2-regular">선호 기기</Text>
-        <View className="flex flex-row gap-2 items-center w-2/3 flex-wrap">
+        <View className="flex flex-row flex-wrap items-center w-2/3 gap-2">
           {project.projectDevices.map((deviceWrapper) => (
             <Badge
               key={deviceWrapper.devices.id}
@@ -189,7 +194,7 @@ export default function ProjectDetailCard({ project, reviewCount }) {
         </View>
       </View>
 
-      <View className="mt-12 h-1 bg-stroke-divider-subtle" />
+      <View className="h-1 mt-12 bg-stroke-divider-subtle" />
       <View className="flex flex-row justify-between">
         <Text>{project.profiles.nickname}</Text>
         <View className="flex flex-row gap-2">
@@ -199,7 +204,7 @@ export default function ProjectDetailCard({ project, reviewCount }) {
           </View>
           <View className="flex flex-row items-center gap-2">
             <Text className="caption2-regular">리뷰</Text>
-            <Text className="caption2-regular">{reviewCount}</Text>
+            <Text className="caption2-regular">{project.reviewCount || 0}</Text>
           </View>
         </View>
       </View>
