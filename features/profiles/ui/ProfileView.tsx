@@ -21,6 +21,7 @@ import { useMyProjects } from "@/entities/projects/model";
 import { ProjectCard } from "@/features/projects/ui/ProjectCard";
 import { usePortfolioImages, PortfolioImage } from "@/entities/uesrs/model";
 import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
+import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -32,8 +33,22 @@ interface ProfileViewProps {
   onBack?: () => void;
 }
 
-export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
+export function ProfileView({ profile: propProfile, isOwnProfile }: ProfileViewProps) {
   const router = useRouter();
+  const { profile: currentUser } = useCurrentUserStore();
+  const profile = isOwnProfile ? currentUser : propProfile;
+
+  if (!profile) {
+    return (
+      <View className="items-center justify-center flex-1 bg-bg-layer-default">
+        <ActivityIndicator size="large" color="#9E77ED" />
+        <Text className="mt-16 body1-regular text-fg-neutral-muted">
+          프로필 정보를 불러오는 중...
+        </Text>
+      </View>
+    );
+  }
+  
   const [selectedProfile, setSelectedProfile] =
     useState<ProfileType>("photographer");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -166,7 +181,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                       </View>
                     ))}
                   </ScrollView>
-                  <View className="absolute bottom-12 right-12 bg-bg-overlay rounded-full">
+                  <View className="absolute rounded-full bottom-12 right-12 bg-bg-overlay">
                     <View className="px-6 py-4 bg-black bg-opacity-50 rounded-8">
                       <Text className="text-fg-neutral-inverted caption1-medium">
                         {currentImageIndex + 1}/{memoizedPortfolioImages.length}
@@ -187,7 +202,12 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
             className="absolute rounded-full left-16 border-gray-40"
             style={{ bottom: -30 }}
           >
-            <UserAvatar size={64} imageUrl={profile?.profileImage} nickname={profile?.nickname} />
+                         <UserAvatar 
+               key={`${profile?.profileImage}-${Date.now()}`} // 더 강력한 key로 이미지 강제 재로드
+               size={64} 
+               imageUrl={profile?.profileImage} 
+               nickname={profile?.nickname} 
+             />
           </View>
         </View>
 
@@ -465,7 +485,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
 
           <TabItem name="reviews" title="리뷰">
             <View className="w-full ">
-            <Text className="heading2-semiBold text-fg-neutral-solid mt-16">리뷰</Text>
+            <Text className="mt-16 heading2-semiBold text-fg-neutral-solid">리뷰</Text>
               {reviewStats && reviewStats.totalReviews > 0 && (
                 <ReviewStats 
                   stats={reviewStats}
