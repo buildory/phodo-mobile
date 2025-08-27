@@ -1,22 +1,21 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { uploadPortfolioImage } from "../api/uploadPortfolioImage";
+import { deletePortfolioImage } from "../api/deletePortfolioImage";
 
-type UploadPortfolioImageParams = {
+type DeletePortfolioImageParams = {
+  imageId: string;
   userId: string;
   profileType: 'photographer' | 'model';
-  imageUri: string; // React Native용 uri
-  title?: string;
 };
 
-export const useUploadPortfolioImage = () => {
+export const useDeletePortfolioImage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: UploadPortfolioImageParams) => uploadPortfolioImage(params),
+    mutationFn: (params: DeletePortfolioImageParams) => deletePortfolioImage({ imageId: params.imageId }),
     onSuccess: (data, variables) => {
       // 관련 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["portfolioImages", variables.userId, variables.profileType] });
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
   });
-};
+}; 

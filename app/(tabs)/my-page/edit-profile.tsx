@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,23 +10,21 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { FontAwesome } from "@expo/vector-icons";
-import { cn } from "@/shared/lib";
 import { Tabs, TabItem } from "@/shared/ui/Tabs";
-import { ExtendedProfile } from "@/entities/uesrs/model/user.types";
 import { useCurrentUserStore } from "@/entities/uesrs/model";
-import { useUpdateProfile } from "@/entities/uesrs/model";
+import { useUpdateProfile, useUploadProfileImage } from "@/entities/uesrs/model";
 import { useUpdatePhotographerProfile } from "@/entities/uesrs/model";
 import { useUpdateModelProfile } from "@/entities/uesrs/model";
-import { useUploadPortfolioImage } from "@/entities/uesrs/model";
+import { useUploadPortfolioImage, useDeletePortfolioImage, usePortfolioImages } from "@/entities/uesrs/model";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
-import LongButton from "@/shared/ui/Button";
+
 import { useFormValidator } from "@/shared/hooks/useFormValidator";
-import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
+
 import { PortfolioImagePicker } from "@/entities/uesrs/ui/PortfolioImagePicker";
 import { ProfileImagePicker } from "@/entities/uesrs/ui/ProfileImagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import Badge from "@/shared/ui/Badge";
+
 
 type ProfileType = "photographer" | "model";
 
@@ -59,20 +57,28 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { profile: currentUser } = useCurrentUserStore();
   const updateProfile = useUpdateProfile();
+  const uploadProfileImage = useUploadProfileImage();
   const updatePhotographerProfile = useUpdatePhotographerProfile();
   const updateModelProfile = useUpdateModelProfile();
   const uploadPortfolioImage = useUploadPortfolioImage();
+  const deletePortfolioImage = useDeletePortfolioImage();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [photographerImages, setPhotographerImages] = useState<
-    Array<{ uri: string; id?: string }>
-  >([]);
-  const [modelImages, setModelImages] = useState<
-    Array<{ uri: string; id?: string }>
-  >([]);
   const [activeTab, setActiveTab] = useState<ProfileType>("photographer");
 
-  useEffect(() => {}, [activeTab]);
+  // 기존 포트폴리오 이미지 로드
+  const { data: photographerImages = [] } = usePortfolioImages(
+    currentUser?.id || "", 
+    "photographer"
+  );
+  const { data: modelImages = [] } = usePortfolioImages(
+    currentUser?.id || "", 
+    "model"
+  );
+
+  // 새로 추가할 이미지들 (아직 업로드되지 않은)
+  const [newPhotographerImages, setNewPhotographerImages] = useState<string[]>([]);
+  const [newModelImages, setNewModelImages] = useState<string[]>([]);
 
   const { values, setValue, errors, validate } =
     useFormValidator<ProfileFormData>(
@@ -99,12 +105,107 @@ export default function EditProfileScreen() {
       validateProfile
     );
 
+  // 포트폴리오 이미지 업로드
+  const handlePortfolioImageUpload = async (imageUri: string, profileType: ProfileType) => {
+    if (!currentUser?.id) return;
+
+    try {
+      await uploadPortfolioImage.mutateAsync({
+        userId: currentUser.id,
+        profileType,
+        imageUri,
+      });
+      
+      // 성공 시 새 이미지 목록에서 제거
+      if (profileType === "photographer") {
+        setNewPhotographerImages(prev => prev.filter(uri => uri !== imageUri));
+      } else {
+        setNewModelImages(prev => prev.filter(uri => uri !== imageUri));
+      }
+    } catch (error) {
+      Alert.alert("오류", `포트폴리오 이미지 업로드 실패: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("포트폴리오 이미지 업로드 에러:", error);
+    }
+  };
+
+  // 현재 탭의 이미지들 (기존 + 새로 추가된 것들)
+  const currentImages = useMemo(() => {
+    const existingImages = activeTab === "photographer" ? photographerImages : modelImages;
+    const newImages = activeTab === "photographer" ? newPhotographerImages : newModelImages;
+    
+    return [
+      ...existingImages.map(img => ({ uri: img.imageUrl, id: img.id, isExisting: true })),
+      ...newImages.map(uri => ({ uri, id: undefined, isExisting: false }))
+    ];
+  }, [activeTab, photographerImages, modelImages, newPhotographerImages, newModelImages]);
+
+  // 포트폴리오 이미지 변경 핸들러
+  const handlePortfolioImagesChange = (images: Array<{ uri: string; id?: string; isExisting?: boolean }>) => {
+    const existingUris = (activeTab === "photographer" ? photographerImages : modelImages).map(img => img.imageUrl);
+    const newUris = images
+      .filter(img => !img.isExisting)
+      .map(img => img.uri);
+    
+    if (activeTab === "photographer") {
+      setNewPhotographerImages(newUris);
+    } else {
+      setNewModelImages(newUris);
+    }
+  };
+
+  // 포트폴리오 이미지 삭제 핸들러
+  const handlePortfolioImageDelete = (imageId: string) => {
+    if (!currentUser?.id) return;
+
+    Alert.alert(
+      "이미지 삭제",
+      "정말로 이 이미지를 삭제하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePortfolioImage.mutateAsync({
+                imageId,
+                userId: currentUser.id,
+                profileType: activeTab,
+              });
+            } catch (error) {
+              Alert.alert("오류", `이미지 삭제 실패: ${error instanceof Error ? error.message : 'Unknown error'}`);
+              console.error("이미지 삭제 에러:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // 완료 버튼 처리
   const handleComplete = async () => {
     if (!validate()) return;
 
     setIsLoading(true);
     try {
+      // 프로필 이미지 업로드 (새로 선택된 경우에만)
+      let profileImageUrl = currentUser?.profileImage;
+      if (values.profileImage && values.profileImage !== currentUser?.profileImage) {
+        if (!currentUser?.id) throw new Error("사용자 ID가 없습니다.");
+        
+        try {
+          const result = await uploadProfileImage.mutateAsync({
+            userId: currentUser.id,
+            imageUri: values.profileImage,
+          });
+          profileImageUrl = result.publicUrl;
+        } catch (error) {
+          Alert.alert("오류", `프로필 이미지 업로드 실패: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.error("프로필 이미지 업로드 에러:", error);
+          return;
+        }
+      }
+
       // 기본 프로필 업데이트
       if (currentUser?.id) {
         await updateProfile.mutateAsync({
@@ -112,7 +213,7 @@ export default function EditProfileScreen() {
           values: {
             nickname: values.nickname,
             gender: values.gender,
-            profileImage: values.profileImage || undefined,
+            profileImage: profileImageUrl || undefined,
           },
         });
       }
@@ -130,13 +231,31 @@ export default function EditProfileScreen() {
         });
       }
 
-      // 포트폴리오 이미지 업로드 (현재는 로컬 상태만 업데이트)
-      // 실제 업로드는 별도 구현 필요
-      console.log("작가 포트폴리오 이미지:", photographerImages);
-      console.log("모델 포트폴리오 이미지:", modelImages);
+      // 새 포트폴리오 이미지들 업로드 (작가와 모델 모두)
+      const photographerImagesToUpload = newPhotographerImages;
+      const modelImagesToUpload = newModelImages;
+      
+      // 작가 이미지들 업로드
+      for (const imageUri of photographerImagesToUpload) {
+        await handlePortfolioImageUpload(imageUri, "photographer");
+      }
+      
+      // 모델 이미지들 업로드
+      for (const imageUri of modelImagesToUpload) {
+        await handlePortfolioImageUpload(imageUri, "model");
+      }
 
-      Alert.alert("성공", "프로필이 수정되었습니다.");
-      router.back();
+             Alert.alert("성공", "프로필이 수정되었습니다.", [
+         {
+           text: "확인",
+           onPress: () => {
+             // 프로필 페이지로 돌아가기 전에 잠시 대기
+             setTimeout(() => {
+               router.back();
+             }, 100);
+           }
+         }
+       ]);
     } catch (error) {
       Alert.alert("오류", "프로필 수정에 실패했습니다.");
       console.error("Profile update error:", error);
@@ -219,13 +338,17 @@ export default function EditProfileScreen() {
 
           {/* 프로필 사진 */}
           <Text className="mt-4 label1-medium">프로필 사진</Text>
-          <ProfileImagePicker
-            imageUri={values.profileImage}
-            onImageChange={(imageUri) => setValue("profileImage", imageUri)}
-            title="프로필 사진"
-            description="프로필에 표시될 이미지를 선택해주세요"
-            size={120}
-          />
+          <View className="flex-row items-center gap-12">
+            <View className="flex-1">
+              <ProfileImagePicker
+                imageUri={values.profileImage}
+                onImageChange={(imageUri) => setValue("profileImage", imageUri)}
+                title="프로필 사진"
+                description="프로필에 표시될 이미지를 선택해주세요"
+                size={120}
+              />
+            </View>
+          </View>
 
           {/* SNS 입력 */}
           <View className="mt-12">
@@ -269,19 +392,19 @@ export default function EditProfileScreen() {
               variant="underline"
               contentClassName="justify-start items-start p-0"
               initialTab="photographer"
+              onTabChange={(tabName: string) => setActiveTab(tabName as ProfileType)}
             >
               <TabItem name="photographer" title="작가">
                 <View className="w-full py-20">
                   {/* 작가 포트폴리오 등록 */}
                   <View className="mb-24">
                     <PortfolioImagePicker
-                      images={photographerImages.map((img) => img.uri)}
-                      onImagesChange={(uris) =>
-                        setPhotographerImages(uris.map((uri) => ({ uri })))
-                      }
-                      maxImages={5}
+                      images={currentImages}
+                      onImagesChange={handlePortfolioImagesChange}
+                      onImageDelete={handlePortfolioImageDelete}
+                      maxImages={6}
                       title="포트폴리오 이미지"
-                      description="작가 포트폴리오 이미지를 추가해주세요"
+                      description={`작가 포트폴리오 이미지를 추가해주세요 (${photographerImages.length + newPhotographerImages.length}/6)`}
                     />
                   </View>
 
@@ -310,13 +433,12 @@ export default function EditProfileScreen() {
                   {/* 모델 포트폴리오 등록 */}
                   <View className="mb-24">
                     <PortfolioImagePicker
-                      images={modelImages.map((img) => img.uri)}
-                      onImagesChange={(uris) =>
-                        setModelImages(uris.map((uri) => ({ uri })))
-                      }
-                      maxImages={5}
+                      images={currentImages}
+                      onImagesChange={handlePortfolioImagesChange}
+                      onImageDelete={handlePortfolioImageDelete}
+                      maxImages={6}
                       title="포트폴리오 이미지"
-                      description="모델 포트폴리오 이미지를 추가해주세요"
+                      description={`모델 포트폴리오 이미지를 추가해주세요 (${modelImages.length + newModelImages.length}/6)`}
                     />
                   </View>
 

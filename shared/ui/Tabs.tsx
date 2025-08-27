@@ -66,6 +66,7 @@ type TabLayoutProps = {
   initialTab?: string;
   variant?: VariantProps<typeof tabVariants>["variant"];
   contentClassName?: string;
+  onTabChange?: (tabName: string) => void;
 };
 
 export type TabItemProps = {
@@ -83,11 +84,17 @@ export function Tabs({
   initialTab,
   variant = "default",
   contentClassName,
+  onTabChange,
 }: TabLayoutProps) {
   const tabList = React.Children.toArray(children) as ReactElement<TabItemProps>[];
   const [activeTab, setActiveTab] = useState(initialTab || tabList[0].props.name);
 
   const activeTabContent = tabList.find(tab => tab.props.name === activeTab)?.props.children;
+
+  const handleTabChange = (tabName: string) => {
+    setActiveTab(tabName);
+    onTabChange?.(tabName);
+  };
 
   return (
     <View className="flex-1">
@@ -98,7 +105,7 @@ export function Tabs({
             <TouchableOpacity
               key={tab.props.name}
               className={tabVariants({ variant, active: isActive })}
-              onPress={() => setActiveTab(tab.props.name)}
+              onPress={() => handleTabChange(tab.props.name)}
             >
               <Text className={tabTextVariants({ variant, active: isActive })}>
                 {tab.props.title}

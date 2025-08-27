@@ -2,9 +2,16 @@ import * as ImagePicker from "expo-image-picker";
 import { View, Text, TouchableOpacity, Image, ScrollView, Pressable } from "react-native";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 
+interface PortfolioImage {
+  uri: string;
+  id?: string;
+  isExisting?: boolean;
+}
+
 interface PortfolioImagePickerProps {
-  images?: string[];
-  onImagesChange: (images: string[]) => void;
+  images?: PortfolioImage[];
+  onImagesChange: (images: PortfolioImage[]) => void;
+  onImageDelete?: (imageId: string) => void;
   maxImages?: number;
   title?: string;
   description?: string;
@@ -13,6 +20,7 @@ interface PortfolioImagePickerProps {
 export const PortfolioImagePicker = ({ 
   images = [], 
   onImagesChange, 
+  onImageDelete,
   maxImages = 3,
   title = "포트폴리오 이미지",
   description = "이미지를 추가해주세요"
@@ -33,16 +41,28 @@ export const PortfolioImagePicker = ({
     });
 
     if (!result.canceled) {
-      const newUris = result.assets.map((a) => a.uri);
-      const updatedImages = [...(images || []), ...newUris].slice(0, maxImages);
+      const newImages = result.assets.map((a) => ({ 
+        uri: a.uri, 
+        id: undefined, 
+        isExisting: false 
+      }));
+      const updatedImages = [...(images || []), ...newImages].slice(0, maxImages);
       onImagesChange(updatedImages);
     }
   };
 
   const removeImage = (index: number) => {
     if (!images) return;
-    const updatedImages = images.filter((_, i) => i !== index);
-    onImagesChange(updatedImages);
+    const imageToRemove = images[index];
+    
+    // 기존 이미지인 경우 삭제 콜백 호출
+    if (imageToRemove.isExisting && imageToRemove.id && onImageDelete) {
+      onImageDelete(imageToRemove.id);
+    } else {
+      // 새 이미지인 경우 로컬에서만 제거
+      const updatedImages = images.filter((_, i) => i !== index);
+      onImagesChange(updatedImages);
+    }
   };
 
   // images가 undefined인 경우 빈 배열로 처리
@@ -54,7 +74,7 @@ export const PortfolioImagePicker = ({
         {title}
       </Text>
       <Text style={{ fontSize: 13, color: "#666", marginBottom: 16 }}>
-        {description} ({safeImages.length} / {maxImages})
+        {description}
       </Text>
       
       <ScrollView
@@ -88,10 +108,11 @@ export const PortfolioImagePicker = ({
             onLongPress={() => removeImage(idx)}
           >
             <Image
-              source={{ uri: img }}
+              source={{ uri: img.uri }}
               style={{ width: 100, height: 100, borderRadius: 8 }}
             />
-            {/* <View style={{
+            {/* 삭제 버튼 */}
+            <View style={{
               position: "absolute",
               top: 4,
               right: 4,
@@ -103,7 +124,7 @@ export const PortfolioImagePicker = ({
               justifyContent: "center",
             }}>
               <Text style={{ color: "white", fontSize: 12 }}>×</Text>
-            </View> */}
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>

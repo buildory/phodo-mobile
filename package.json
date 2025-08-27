@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.3",
+    "@aws-sdk/client-s3": "^3.876.0",
     "@dev-plugins/react-query": "~0.2.0",
     "@expo/vector-icons": "^14.0.2",
     "@gorhom/bottom-sheet": "^5.1.4",
@@ -61,6 +62,7 @@
     "react-native": "0.76.9",
     "react-native-calendars": "^1.1312.1",
     "react-native-gesture-handler": "~2.20.2",
+    "react-native-get-random-values": "^1.11.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.4.0",
@@ -75,6 +77,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-class-static-block": "^7.28.3",
     "@tokens-studio/sd-transforms": "^2.0.1",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.3.12",

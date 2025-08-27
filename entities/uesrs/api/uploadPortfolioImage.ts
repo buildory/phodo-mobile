@@ -1,17 +1,18 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { PortfolioImage } from '../model/user.types';
+import { uploadToMinio } from "@/shared/api/s3";
 
 interface UploadPortfolioImageParams {
   userId: string;
   profileType: 'photographer' | 'model';
-  imageFile: File;
+  imageUri: string; // React Native용 uri
   title?: string;
 }
 
 export async function uploadPortfolioImage({
   userId,
   profileType,
-  imageFile,
+  imageUri,
   title,
 }: UploadPortfolioImageParams): Promise<PortfolioImage> {
   const supabase = getSupabaseClient();
@@ -33,25 +34,19 @@ export async function uploadPortfolioImage({
     throw new Error('포트폴리오 이미지는 최대 6개까지 업로드할 수 있습니다.');
   }
 
-  // 파일명 생성
-  const fileExt = imageFile.name.split('.').pop();
-  const fileName = `portfolio_${userId}_${Date.now()}.${fileExt}`;
-  
-  const filePath = `portfolio-images/${fileName}`;
+  // 안전한 파일명 생성
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  const fileName = `portfolio_${userId}_${timestamp}_${randomSuffix}.jpg`;
+  const key = `${userId}/${profileType}/${fileName}`;
 
-  // Storage에 이미지 업로드
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('portfolio-images')
-    .upload(filePath, imageFile);
-
-  if (uploadError) {
-    throw new Error(`이미지 업로드에 실패했습니다: ${uploadError.message}`);
-  }
-
-  // Public URL 생성
-  const { data: { publicUrl } } = supabase.storage
-    .from('portfolio-images')
-    .getPublicUrl(filePath);
+  // MinIO에 이미지 업로드
+  const publicUrl = await uploadToMinio({
+    bucket: "portfolio-images",
+    key: key,
+    uri: imageUri,
+    mime: "image/jpeg"
+  });
 
   // DB에 포트폴리오 이미지 정보 저장
   const { data: dbData, error: dbError } = await supabase
@@ -61,8 +56,6 @@ export async function uploadPortfolioImage({
       type: profileType,
       image_url: publicUrl,
       order_index: currentCount + 1,
-      title: title || undefined,
-      description: undefined,
     })
     .select()
     .single();
