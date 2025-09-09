@@ -28,8 +28,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
-import { createProject } from "@/entities/projects/api/createProject";
-import { uploadImages } from "@/entities/projects/api/uploadImages";
+import { useCreateProject } from "@/entities/projects/model/useCreateProject";
 import { useToast } from "@/shared/hooks/useToast";
 const validateTitle = (value: { title: string }) => {
   const errors: Partial<Record<keyof typeof value, string>> = {};
@@ -83,10 +82,9 @@ export default function CreateProjectPage() {
   const [localDurationInput, setLocalDurationInput] = useState(
     form.durationHours !== null ? String(form.durationHours) : ""
   );
-  const [upLoading, setUploading] = useState(false);
   const { profile } = useCurrentUserStore();
-
   const toast = useToast();
+  const {mutate: createProject} = useCreateProject();
   const totalPrice =
     typeof form.durationHours === "number" &&
     typeof form.pricePerHour === "number"
@@ -217,53 +215,46 @@ export default function CreateProjectPage() {
     setShowCalendar(false);
   };
 
-  const handleAddMapPin = async () => {
-    if (!form.inputLocation || !form.longitude || !form.latitude) return;
+  const handleAddShooting = () => {
+    // 유효성 검사
+    if (!form.inputLocation || !form.longitude || !form.latitude) {
+      toast.showError(
+        "위치 정보가 필요해요",
+        "촬영 위치를 설정해주세요."
+      );
+      return;
+    }
 
     let title = form.title.trim();
-
     if (!title) {
       title =
         form.recruitType === "photographer"
           ? "언제든지 여기서 촬영할 작가님을 구해요"
           : "언제든지 여기서 촬영할 모델님을 구해요";
     }
-    const payload = {
+
+    const processedForm = {
       ...form,
       title,
       availableStartTime: form.availableStartTime?.toTimeString().split(" ")[0],
       availableEndTime: form.availableEndTime?.toTimeString().split(" ")[0],
     };
 
-    try {
-      setUploading(true);
-
-      const result = await createProject(payload);
-
-      const projectId = result?.id;
-
-      if (!projectId) {
-        toast.showError(
-          "프로젝트 등록에 실패했어요",
-          "잠시 후 다시 시도해주세요."
-        );
-        return;
+    createProject(
+      { form: processedForm, images },
+      {
+        onSuccess: () => {
+          resetForm();
+          router.back();
+        },
+        onError: () => {
+          toast.showError(
+            "프로젝트 등록에 실패했어요",
+            "잠시 후 다시 시도해주세요."
+          );
+        },
       }
-
-      if (images.length > 0) {
-        await uploadImages({ uris: images, projectId });
-      }
-
-      resetForm();
-      router.back();
-    } catch (error) {
-      toast.showError(
-        "프로젝트 등록에 실패했어요",
-        "잠시 후 다시 시도해주세요."
-      );
-    } finally {
-      setUploading(false);
-    }
+    );
   };
 
   useEffect(() => {
@@ -878,10 +869,10 @@ export default function CreateProjectPage() {
       </ScrollView>
       <View style={{ marginBottom: 52, marginTop: 20 }}>
         <LongButton
-          loading={upLoading}
-          disabled={upLoading}
+          loading={createProjectMutation.isPending}
+          disabled={createProjectMutation.isPending}
           title={"촬영 모집글 등록하기"}
-          onPress={handleAddMapPin}
+          onPress={handleAddShooting}
         />
       </View>
     </View>
