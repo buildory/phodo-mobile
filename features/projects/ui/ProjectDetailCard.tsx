@@ -129,7 +129,7 @@ export default function ProjectDetailCard({ project }: ProjectDetailCardProps) {
       </View>
 
       <View className="flex flex-row items-center gap-2">
-        <View className="flex flex-row flex-wrap w-2/3 gap-2">
+        <View className="flex flex-row flex-wrap w-full gap-2">
           {project.projectCategories.map((categoryWrapper) => (
             <Badge
               size="sm"
@@ -142,7 +142,7 @@ export default function ProjectDetailCard({ project }: ProjectDetailCardProps) {
         </View>
       </View>
       <View className="flex flex-row items-center gap-2">
-        <View className="flex flex-row flex-wrap items-center w-2/3 gap-2">
+        <View className="flex flex-row flex-wrap items-center w-full gap-2">
           <Badge
             size="sm"
             className="rounded-full"
@@ -152,7 +152,7 @@ export default function ProjectDetailCard({ project }: ProjectDetailCardProps) {
         </View>
       </View>
       <View className="flex flex-row items-center gap-2">
-        <View className="flex flex-row flex-wrap items-center w-2/3 gap-2">
+        <View className="flex flex-row flex-wrap items-center w-full gap-2">
           {project.projectDevices.map((deviceWrapper) => (
             <Badge
               key={deviceWrapper.devices.id}
