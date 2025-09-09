@@ -56,7 +56,7 @@ export function ShootingPaymentInfo({
 }: ProjectPaymentInfoProps) {
   return (
     <View className="flex flex-row items-center gap-8">
-      <Badge label={isPaid ? "유료" : "무료"} />
+      <Badge className="bg-fg-brand rounded-4" textClassName="caption1-medium text-fg-neutral-inverted" label={isPaid ? "유료" : "무료"} />
       <Text className="text-fg-brand label1-semiBold">
         {isPaid
           ? `${new Intl.NumberFormat("ko-KR").format(pricePerHour ?? 0)}원`
