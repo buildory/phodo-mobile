@@ -25,7 +25,7 @@ const CreateProjectSheet = forwardRef<CreateProjectSheetRef>(({location}, ref) =
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => {
-  return isKeyboardVisible ? ["35%", "55%"] : ["35%"];
+  return isKeyboardVisible ? ["40%", "55%"] : ["40%"];
 }, [isKeyboardVisible]);
   const router = useRouter();
 
@@ -78,14 +78,17 @@ useEffect(() => {
             error={errors.inputLocation}
           />
           <LongButton
+            disabled={!values.inputLocation}
             onPress={() => {
               setField('latitude', location.latitude);
               setField('longitude', location.longitude);
               setField('locationAddress', location.address);
               setField('inputLocation', values.inputLocation);
+              setValue('inputLocation', "");
+              bottomSheetRef.current?.close();
               router.push("/project/new")
             }}
-            title="이 위치에 촬영 맵핀 등록하기"
+            title="이 위치에서 촬영하기"
           />
       </BottomSheetView>
         </KeyboardAvoidingView>
@@ -99,6 +102,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   flatListContent: {
     gap: 20,
