@@ -13,7 +13,8 @@ export const getProject = async (projectId: string): Promise<Project | null> => 
         profiles (
           nickname,
           gender,
-          role
+          role,
+          profile_image
         ),
         project_applicants (
           applicant_id

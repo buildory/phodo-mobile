@@ -14,7 +14,11 @@ export const getProjects = async (
         profiles (
           nickname,
           gender,
-          role
+          role,
+          profile_image
+        ),
+        project_applicants (
+          applicant_id
         ),
         project_categories (
           categories (
