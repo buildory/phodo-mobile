@@ -12,7 +12,7 @@ type BadgeProps = {
   PressableProps;
 
 const badgeVariants = cva(
-  "self-start w-fit flex-row items-center border rounded-full",
+  "self-start w-fit flex-row items-center border",
   {
     variants: {
       size: {
