@@ -880,7 +880,7 @@ export default function CreateProjectPage() {
         <LongButton
           loading={upLoading}
           disabled={upLoading}
-          title={"촬영 맵핀 등록하기"}
+          title={"촬영 모집글 등록하기"}
           onPress={handleAddMapPin}
         />
       </View>
