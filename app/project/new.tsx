@@ -84,7 +84,7 @@ export default function CreateProjectPage() {
   );
   const { profile } = useCurrentUserStore();
   const toast = useToast();
-  const {mutate: createProject} = useCreateProject();
+  const {mutate: createProject, isPending: isCreatingProject} = useCreateProject();
   const totalPrice =
     typeof form.durationHours === "number" &&
     typeof form.pricePerHour === "number"
@@ -869,8 +869,8 @@ export default function CreateProjectPage() {
       </ScrollView>
       <View style={{ marginBottom: 52, marginTop: 20 }}>
         <LongButton
-          loading={createProjectMutation.isPending}
-          disabled={createProjectMutation.isPending}
+          loading={isCreatingProject}
+          disabled={isCreatingProject}
           title={"촬영 모집글 등록하기"}
           onPress={handleAddShooting}
         />
