@@ -7,14 +7,14 @@ export function RecruitTypeBadge({selected, onSelect}) {
     <View style={styles.badgeContainer}>
       <Badge
         size={"lg"}
-        className={`${selected === 'photographer' ? 'bg-bg-layer-default-pressed' : 'bg-bg-layer-default'}`}
+        className={`rounded-full ${selected === 'photographer' ? 'bg-bg-layer-default-pressed' : 'bg-bg-layer-default'}`}
         onPress={() =>  onSelect?.(selected === 'photographer' ? null : 'photographer')}
         label={"작가 구인"}
         icon={selected === 'photographer' ? <IconSymbol size={12} name="check" color={"#000"} /> : null}
       />
       <Badge
         size={"lg"}
-        className={`${selected === 'model' ? 'bg-bg-layer-default-pressed' : 'bg-bg-layer-default'}`}
+        className={`rounded-full ${selected === 'model' ? 'bg-bg-layer-default-pressed' : 'bg-bg-layer-default'}`}
         onPress={() =>  onSelect?.(selected === 'model' ? null : 'model')}
         label={"모델 구인"}
         icon={selected === 'model' ? <IconSymbol size={12} name="check" color={"#000"} /> : null}

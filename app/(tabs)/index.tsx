@@ -63,7 +63,7 @@ export default function SearchScreen() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const { data: projects } = useProjects({recruitType: selectedType});
   const { expoPushToken } = useRegisterPushToken();
-  const { mutate: updateProfile } = useUpdateProfile();
+  const { mutate: updateProfile } = useUpdateProfile(); 
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const listSheetRef = useRef<ProjectListSheetRef>(null);
@@ -159,6 +159,8 @@ const handleCameraIdle = (e) => {
                 project.recruitType,
                 project.userId === profile?.id
                   ? "self"
+                  : project.profiles.role === "admin"
+                  ? "admin"
                   : project.profiles.gender
               )}
               onTap={() => {

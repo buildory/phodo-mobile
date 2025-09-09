@@ -2,6 +2,7 @@ import React from "react";
 import Badge from "@/shared/ui/Badge";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import Octicons from "@expo/vector-icons/Octicons";
+import { cn } from "@/shared/lib";
 
 const SHOOTING_STATUS = {
   PENDING: "pending",
@@ -75,7 +76,7 @@ export function ShootingStatusBadge({
 
   return (
     <Badge
-      className={className}
+      className={cn(className, "rounded-full")}
       textClassName={textClassName}
       label={SHOOTING_STATUS_LABELS[status]}
       icon={<Octicons className="mr-2" name="dot-fill" size={14} color={iconColorClass} />}

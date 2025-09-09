@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { BackHandler } from 'react-native';
 import 'react-native-reanimated';
 
-import { AuthProvider, useAuth, ToastProvider, QueryProvider } from '@/shared/providers';
+import { AuthProvider, useAuth, ToastProvider, QueryProvider, BottomSheetProvider } from '@/shared/providers';
 import { useColorScheme } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { usePushNotificationListeners } from '@/shared/hooks/usePushNotificationListeners'
@@ -32,7 +32,9 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <InnerLayout />
+        <BottomSheetProvider>
+          <InnerLayout />
+        </BottomSheetProvider>
       </AuthProvider>
     </QueryProvider>
   );

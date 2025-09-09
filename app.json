@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#9E77ED"
       },
       "package": "com.buildory.phodo"
     },
@@ -31,7 +31,7 @@
           "image": "./assets/images/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#181D27"
+          "backgroundColor": "#9E77ED"
         }
       ]
     ],
