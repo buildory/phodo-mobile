@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useImperativeHandle, forwardRef } from "react";
-import { StyleSheet, Text, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
+import { Text, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
 import LongButton from "@/shared/ui/Button";
 import { useFormValidator } from "@/shared/hooks/useFormValidator";
 import { useProjectFormStore } from "@/features/projects/model/useProjectFormStore";
+import { useBottomSheet } from "@/shared/providers/BottomSheetProvider";
+import { BOTTOM_SHEET_IDS } from "@/shared/hooks/useBottomSheetManager";
 
 export type CreateProjectSheetRef = {
   open: (index: number) => void;
@@ -24,6 +26,7 @@ const CreateProjectSheet = forwardRef<CreateProjectSheetRef>(({location}, ref) =
   const { setField } = useProjectFormStore();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const { registerSheet, unregisterSheet, openSheet, closeSheet } = useBottomSheet();
   const snapPoints = useMemo(() => {
   return isKeyboardVisible ? ["40%", "55%"] : ["40%"];
 }, [isKeyboardVisible]);
@@ -35,9 +38,15 @@ const CreateProjectSheet = forwardRef<CreateProjectSheetRef>(({location}, ref) =
   );
 
   useImperativeHandle(ref, () => ({
-    open: (index = 0) => bottomSheetRef.current?.snapToIndex(index),
-    close: () => bottomSheetRef.current?.close(),
+    open: (index = 0) => openSheet(BOTTOM_SHEET_IDS.CREATE_PROJECT, index),
+    close: () => closeSheet(BOTTOM_SHEET_IDS.CREATE_PROJECT),
   }));
+
+  // Sheet 등록/해제
+  useEffect(() => {
+    registerSheet(BOTTOM_SHEET_IDS.CREATE_PROJECT, bottomSheetRef);
+    return () => unregisterSheet(BOTTOM_SHEET_IDS.CREATE_PROJECT);
+  }, [registerSheet, unregisterSheet]);
 
 useEffect(() => {
   const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -67,9 +76,9 @@ useEffect(() => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-      <BottomSheetView style={styles.contentContainer}>
-          <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 4}}>촬영 장소 이름을 입력해주세요</Text>
-          <Text style={{fontSize: 14, color: '#535862',marginBottom: 20}}>다른 사용자도 알아볼 수 있도록 간단히 입력해주세요</Text>
+      <BottomSheetView className="flex-1 p-16">
+          <Text className="heading2-semiBold text-fg-neutral-solid">촬영 장소 이름을 입력해주세요</Text>
+          <Text className="label1-semiBold text-fg-neutral-muted mt-8 mb-20">다른 사용자도 알아볼 수 있도록 간단히 입력해주세요</Text>
           <ValidatedInput
             placeholder="예)강남역 1번 출구, 교보타워 앞"
             value={values.inputLocation}
@@ -85,7 +94,7 @@ useEffect(() => {
               setField('locationAddress', location.address);
               setField('inputLocation', values.inputLocation);
               setValue('inputLocation', "");
-              bottomSheetRef.current?.close();
+              closeSheet(BOTTOM_SHEET_IDS.CREATE_PROJECT);
               router.push("/project/new")
             }}
             title="이 위치에서 촬영하기"
@@ -97,15 +106,3 @@ useEffect(() => {
 });
 
 export default CreateProjectSheet;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  flatListContent: {
-    gap: 20,
-    paddingBottom: 20,
-  },
-});

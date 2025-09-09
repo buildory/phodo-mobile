@@ -3,6 +3,7 @@ import React, {
   useRef,
   useImperativeHandle,
   forwardRef,
+  useEffect,
 } from "react";
 import {
   StyleSheet,
@@ -10,21 +11,29 @@ import {
 import { useRouter } from "expo-router";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { ProjectCard } from "./ProjectCard";
+import { useBottomSheet } from "@/shared/providers/BottomSheetProvider";
+import { BOTTOM_SHEET_IDS } from "@/shared/hooks/useBottomSheetManager";
 
 export type ProjectDetailSheetRef = {
   open: () => void;
   close: () => void;
 };
 
-
 const ProjectDetailSheet = forwardRef<ProjectDetailSheetRef>(
-  ({ project, }, ref) => {
+  ({ project, mylocation }, ref) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const { registerSheet, unregisterSheet, openSheet, closeSheet } = useBottomSheet();
     const [index, setIndex] = useState(0);
-  useImperativeHandle(ref, () => ({
-    open: () => bottomSheetRef.current?.snapToIndex(0),
-    close: () => bottomSheetRef.current?.close(),
-  }));
+
+    useImperativeHandle(ref, () => ({
+      open: () => openSheet(BOTTOM_SHEET_IDS.PROJECT_DETAIL, 0),
+      close: () => closeSheet(BOTTOM_SHEET_IDS.PROJECT_DETAIL),
+    }));
+
+    useEffect(() => {
+      registerSheet(BOTTOM_SHEET_IDS.PROJECT_DETAIL, bottomSheetRef);
+      return () => unregisterSheet(BOTTOM_SHEET_IDS.PROJECT_DETAIL);
+    }, [registerSheet, unregisterSheet]);
 
   const router = useRouter();
 
@@ -41,7 +50,7 @@ const ProjectDetailSheet = forwardRef<ProjectDetailSheetRef>(
         enablePanDownToClose={true}
       >
       <BottomSheetView style={styles.container}>
-        <ProjectCard project={project} onPress={() => handlePressProject(project)}/>
+        <ProjectCard project={project} myLocation={mylocation} onPress={() => handlePressProject(project)}/>
       </BottomSheetView>
       </BottomSheet>
     );
