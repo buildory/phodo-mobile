@@ -22,6 +22,8 @@ class MainApplication : Application(), ReactApplication {
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {
+          override fun getJSBundleFile(): String = CodePush.getJSBundleFile()
+
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
             // Packages that cannot be autolinked yet can be added manually here, for example:
@@ -29,13 +31,9 @@ class MainApplication : Application(), ReactApplication {
             return packages
           }
 
-          override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
-
           override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
-
           override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
           override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-          override fun getJSBundleFile(): String = CodePush.getJSBundleFile()
       }
   )
 
