@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getRelativeTime } from "@/shared/lib";
 import ActionButton from "@/shared/ui/ActionButton";
 import ConfirmModal from "@/shared/ui/ConfirmModal";
+import { calculateDistance, getFormattedDistance } from "@/features/projects/lib/geoUtils";
 import {
   ShootingStatusBadge,
   ShootingPaymentInfo,
@@ -16,13 +17,15 @@ import { useCreateNotification } from "@/entities/notification/model";
 import { useToast } from "@/shared/hooks/useToast";
 import { router } from "expo-router";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
+import { useLocationTracking } from "@/shared/hooks/useLocationTracking";
 
 interface ReadyApplicantCardProps {
   item: any;
   project: any;
+  myLocation: { latitude: number; longitude: number } | null;
 }
 
-export default function ReadyApplicantCard({ item, project }: ReadyApplicantCardProps) {
+export default function ReadyApplicantCard({ item, project, myLocation }: ReadyApplicantCardProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { mutate: rejectMatch } = useDeleteApplicant();
@@ -30,6 +33,73 @@ export default function ReadyApplicantCard({ item, project }: ReadyApplicantCard
   const { mutate: updateApplicant } = useUpdateApplicant();
   const { navigateToChat } = useChatRoomOrCreate();
   const [isModalVisible, setModalVisible] = useState(false);
+  
+  // 실시간 위치 추적
+  const { 
+    location: currentLocation, 
+    isLocationEnabled, 
+    error: locationError,
+    requestPermission,
+    startTracking 
+  } = useLocationTracking({
+    accuracy: 6, // High accuracy
+    timeInterval: 5000, // 5초마다 업데이트
+    distanceInterval: 5, // 5m 이동 시 업데이트
+    enabled: true
+  });
+  
+  // 촬영 시작 버튼 활성화 여부 (실시간 위치 사용)
+  const isShootingStartEnabled = () => {
+    if (!currentLocation || !project?.latitude || !project?.longitude) {
+      return false;
+    }
+
+    const distanceInMeters = calculateDistance(
+      currentLocation.coords.latitude,
+      currentLocation.coords.longitude,
+      project.latitude,
+      project.longitude
+    );
+    
+    return distanceInMeters <= 500; // 500m 이내
+  };
+
+  // 현재 위치와 프로젝트 위치 간의 거리 (실시간 위치 사용)
+  const getCurrentDistance = () => {
+    if (!currentLocation || !project?.latitude || !project?.longitude) {
+      return null;
+    }
+    
+    return getFormattedDistance(
+      currentLocation.coords.latitude,
+      currentLocation.coords.longitude,
+      project.latitude,
+      project.longitude
+    );
+  };
+
+  // 위치 상태에 따른 안내 메시지
+  const getLocationMessage = () => {
+    if (locationError) {
+      return "위치 권한을 허용해주세요.";
+    }
+    
+    if (!isLocationEnabled) {
+      return "위치 서비스를 켜주세요.";
+    }
+    
+    if (!currentLocation) {
+      return "위치를 확인하고 있어요...";
+    }
+    
+    if (isShootingStartEnabled()) {
+      // 500m 이내일 때는 실시간 거리 표시
+      const distance = getCurrentDistance();
+      return `촬영 장소까지 ${distance} 남았어요!`;
+    }
+    
+    return "촬영 장소 근처에 도착하면 촬영 시작 버튼이 활성화돼요.";
+  };
 
   const handleMatchCancel = () => {
     setModalVisible(true);
@@ -66,7 +136,7 @@ export default function ReadyApplicantCard({ item, project }: ReadyApplicantCard
             title={"촬영 취소"}
           />
           <ActionButton
-            disabled={item?.status === "ready"}
+            disabled={!isShootingStartEnabled()}
             onPress={() => {}}
             className="flex-1"
             size={"md"}
@@ -74,7 +144,7 @@ export default function ReadyApplicantCard({ item, project }: ReadyApplicantCard
             title={"촬영 시작"}
           />
         </View>
-        <Text className="caption1-regular text-fg-neutral-muted">촬영 장소 근처에 도착하면 촬영 시작 버튼이 활성화돼요.</Text>
+        <Text className="caption1-regular text-fg-neutral-muted">{getLocationMessage()}</Text>
       </View>
 
       <ConfirmModal

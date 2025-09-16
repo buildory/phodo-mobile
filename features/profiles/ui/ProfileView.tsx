@@ -457,7 +457,7 @@ export function ProfileView({ profile: propProfile, isOwnProfile }: ProfileViewP
                   data={filteredProjects}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ProjectCard project={item} onPress={() => {}} />
+                    <ProjectCard project={item} myLocation={null} onPress={() => {}} />
                   )}
                   horizontal
                   showsHorizontalScrollIndicator={false}

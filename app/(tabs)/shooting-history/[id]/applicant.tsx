@@ -13,11 +13,26 @@ import { router, useLocalSearchParams } from "expo-router";
 import ApplicantCard from "@/features/projects/ui/ApplicantCard";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import { useProject } from "@/entities/projects/model";
+import { useLocationTracking } from "@/shared/hooks/useLocationTracking";
 
 export default function ApplicantScreen() {
   const { id } = useLocalSearchParams();
   const { data: applicants } = useApplicants(Number(id));
   const { data: project } = useProject(String(id));
+
+  // 위치 추적 훅 사용
+  const { location: myLocation } = useLocationTracking({
+    accuracy: 1, // Highest accuracy
+    timeInterval: 10000, // 10초마다
+    distanceInterval: 10, // 10m 이동 시에만
+    enabled: true
+  });
+
+  // myLocation을 ApplicantCard에 맞는 형태로 변환
+  const myLocationForCard = myLocation ? {
+    latitude: myLocation.coords.latitude,
+    longitude: myLocation.coords.longitude
+  } : null;
 
   const pendingApplicants = applicants?.filter(
     (p) =>
@@ -61,7 +76,7 @@ export default function ApplicantScreen() {
                   data={pendingApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} />
+                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -90,7 +105,7 @@ export default function ApplicantScreen() {
                   data={inProgressApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} />
+                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -119,7 +134,7 @@ export default function ApplicantScreen() {
                   data={doneApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} />
+                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -148,7 +163,7 @@ export default function ApplicantScreen() {
                   data={canceledApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project}/>
+                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard}/>
                   )}
                   contentContainerStyle={{
                     gap: 20,
