@@ -1,5 +1,5 @@
-import { View, Text, Pressable } from "react-native";
-import Badge from "@/shared/ui/Badge";
+import { View, Text } from "react-native";
+import { Pressable } from 'react-native-gesture-handler'
 import { copyToClipboard } from "@/shared/lib/clipboard";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import {
@@ -80,11 +80,10 @@ export function ProjectCard({
               촬영 장소
             </Text>
           </View>
-
-          <Pressable
+          <Pressable 
             onPress={() => copyToClipboard(project.locationAddress)}
-            className="flex flex-row items-center flex-1 gap-6"
           >
+            <View className="flex flex-row items-center flex-1 gap-6">
             <Text 
               ellipsizeMode="tail" 
               numberOfLines={1}
@@ -98,6 +97,7 @@ export function ProjectCard({
               color="#000"
               className="ml-4"
             />
+            </View>
           </Pressable>
         </View>
         <Text className="caption1-regular text-fg-info-solid">
