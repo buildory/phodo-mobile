@@ -53,11 +53,7 @@ export const checkCodePushUpdate = async() => {
   }
 }
 
-export const redirectToAppStore = () => {
-  const storeUrl = Platform.select({
-    ios: process.env.EXPO_PUBLIC_APPSTORE_URL,
-    android: process.env.EXPO_PUBLIC_PLAYSTORE_URL,
-  });
+export const redirectToAppStore = (storeUrl: string) => {
   if (storeUrl) {
     Linking.openURL(storeUrl).catch((err) => {
       console.error('스토어 열기 실패:', err);

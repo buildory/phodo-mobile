@@ -36,7 +36,7 @@ export const useCheckAppVersion = () => {
             [
               {
                 text: "업데이트",
-                onPress: () => redirectToAppStore(),
+                onPress: () => redirectToAppStore(latestAppVersionInfo.storeUrl),
               },
               {
                 text: "취소",
@@ -45,8 +45,6 @@ export const useCheckAppVersion = () => {
             ],
             { cancelable: false }
           );
-        } else {
-          checkCodePushUpdate();
         }
       }
     );

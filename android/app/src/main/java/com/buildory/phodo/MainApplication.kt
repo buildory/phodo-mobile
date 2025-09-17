@@ -15,14 +15,14 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
-import com.microsoft.codepush.react.CodePush
+//import com.microsoft.codepush.react.CodePush
 
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {
-          override fun getJSBundleFile(): String = CodePush.getJSBundleFile()
+          //override fun getJSBundleFile(): String = CodePush.getJSBundleFile()
 
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
