@@ -29,6 +29,7 @@ import { useProjectFormStore } from "@/features/projects/model/useProjectFormSto
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
 import { useCreateProject } from "@/entities/projects/model/useCreateProject";
+import { uploadImages } from "@/entities/projects/api/uploadImages";
 import { useToast } from "@/shared/hooks/useToast";
 const validateTitle = (value: { title: string }) => {
   const errors: Partial<Record<keyof typeof value, string>> = {};
@@ -243,15 +244,23 @@ export default function CreateProjectPage() {
     createProject(
       { form: processedForm, images },
       {
-        onSuccess: () => {
+        onSuccess: async (data: any) => {
+          if (images.length > 0) {
+            const uris = images.map((it: any) =>
+              typeof it === "string" ? it : it?.uri ?? it?.path ?? it?.localUri
+            ).filter(Boolean);
+    
+            try {
+              await uploadImages({ uris, projectId: data.id });
+            } catch (e) {
+              console.error(e);
+            }
+          }
           resetForm();
           router.back();
         },
         onError: () => {
-          toast.showError(
-            "프로젝트 등록에 실패했어요",
-            "잠시 후 다시 시도해주세요."
-          );
+          toast.showError("프로젝트 등록에 실패했어요", "잠시 후 다시 시도해주세요.");
         },
       }
     );
