@@ -57,3 +57,29 @@ export const formatDateTime = (
   return dayjs.utc(utcDate).add(9, 'hour').format(format);
 };
 
+/**
+ * 시작 시간부터 현재까지의 경과 시간을 "1시간 30분" 형태로 표시
+ */
+export const getElapsedTime = (startedAt: string | Date): string => {
+  const start = dayjs.utc(startedAt);
+  const now = dayjs.utc();
+  const diff = now.diff(start, 'minute');
+  
+  if (diff < 1) {
+    return '방금 전';
+  }
+  
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  
+  if (hours === 0) {
+    return `${minutes}분`;
+  }
+  
+  if (minutes === 0) {
+    return `${hours}시간`;
+  }
+  
+  return `${hours}시간 ${minutes}분`;
+};
+

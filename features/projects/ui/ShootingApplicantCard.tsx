@@ -1,13 +1,12 @@
 import { View, Text, Pressable } from "react-native";
 import { getRelativeTime } from "@/shared/lib";
+import { useElapsedTime } from "@/shared/hooks/useElapsedTime";
 import {
   ShootingStatusBadge,
   ShootingPaymentInfo,
 } from "@/entities/projects/ui";
-import { router } from "expo-router";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 import ActionButton from "@/shared/ui/ActionButton";
-import { useState } from "react";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 
 interface ShootingApplicantCardProps {
@@ -17,13 +16,14 @@ interface ShootingApplicantCardProps {
 
 export default function ShootingApplicantCard({ item, project }: ShootingApplicantCardProps) {
   const { navigateToChat } = useChatRoomOrCreate();
-  
+  const elapsedTime = useElapsedTime(item?.startedAt);
+
   return (
     <View className="flex flex-col gap-8 p-16 bg-bg-layer-default rounded-16">
       <View className="flex flex-row items-center justify-between">
         <ShootingStatusBadge status={item?.status} />
         <Text className="caption1-regular text-fg-neutral-subtle">
-          {getRelativeTime(item.createdAt)}
+          {getRelativeTime(item.updatedAt)}
         </Text>
       </View>
               <View className="flex flex-row justify-between">
@@ -35,7 +35,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
         <View className="flex flex-row items-center gap-4">
           <IconSymbol name="camera" size={24} color="#1A1C20" />
           <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
-          <Text className="label1-regular text-fg-info-solid ml-auto">1시간 30분</Text>
+          <Text className="label1-regular text-fg-info-solid ml-auto">{elapsedTime || '알 수 없음'}</Text>
         </View>
       <ShootingPaymentInfo
         isPaid={item?.isPaid}
