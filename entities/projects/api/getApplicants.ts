@@ -11,6 +11,11 @@ export const getApplicants = async (projectId: number) => {
       status,
       message,
       created_at,
+      updated_at,
+      matched_at,
+      started_at,
+      ended_at,
+      completed_at,
       applicant:profiles (
         id,
         nickname,
@@ -23,7 +28,7 @@ export const getApplicants = async (projectId: number) => {
       )
     `)
     .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
 
   if (error) throw error;
 

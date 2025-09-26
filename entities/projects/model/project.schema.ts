@@ -111,6 +111,22 @@ export const ApplicantSchema = z.object({
   updatedAt: z
     .date()
     .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
+  matchedAt: z
+    .date()
+    .optional()
+    .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
+  startedAt: z
+    .date()
+    .optional()
+    .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
+  endedAt: z
+    .date()
+    .optional()
+    .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
+  completedAt: z
+    .date()
+    .optional()
+    .openapi({ format: "date-time", example: "2025-06-15 19:40:20.245925" }),
   message: z
     .string()
     .optional()
