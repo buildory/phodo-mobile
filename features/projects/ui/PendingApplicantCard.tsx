@@ -42,6 +42,7 @@ export default function PendingApplicantCard({ item, project }: PendingApplicant
         values: {
           status: "ready",
           updatedAt: new Date(),
+          matchedAt: new Date(),
         },
       },
       {
