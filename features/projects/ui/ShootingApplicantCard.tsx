@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { getRelativeTime } from "@/shared/lib";
+import { getRelativeTime, getOneWeekLater } from "@/shared/lib";
 import { useElapsedTime } from "@/shared/hooks/useElapsedTime";
 import {
   ShootingStatusBadge,
@@ -8,6 +8,9 @@ import {
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 import ActionButton from "@/shared/ui/ActionButton";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
+import { useUpdateApplicant } from "@/entities/projects/model";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/shared/hooks/useToast";
 
 interface ShootingApplicantCardProps {
   item: any;
@@ -17,6 +20,53 @@ interface ShootingApplicantCardProps {
 export default function ShootingApplicantCard({ item, project }: ShootingApplicantCardProps) {
   const { navigateToChat } = useChatRoomOrCreate();
   const elapsedTime = useElapsedTime(item?.startedAt);
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const { mutate: updateApplicant } = useUpdateApplicant();
+
+  const handleShootingEnd = () => {
+    updateApplicant(
+      {
+        id: item?.id,
+        values: {
+          status: "review",
+          endedAt: new Date(),
+          completedAt: getOneWeekLater(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+        },
+        onError: (error: any) => {
+          console.error("촬영 종료 중 오류:", error);
+          toast.showError("촬영 종료 실패했어요", "잠시 후 다시 시도해주세요.");
+        },
+      }
+    );
+  }
+  const handleShootingStop = () => {
+    updateApplicant(
+      {
+        id: item?.id,
+        values: {
+          status: "ready",
+          startedAt: undefined,
+          updatedAt: new Date(),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+        },
+        onError: (error: any) => {
+          console.error("촬영 중단 중 오류:", error);
+          toast.showError("촬영 중단 실패했어요", "잠시 후 다시 시도해주세요.");
+        },
+      }
+    );
+  }
 
   return (
     <View className="flex flex-col gap-8 p-16 bg-bg-layer-default rounded-16">
@@ -44,7 +94,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
       />
         <View className="flex flex-row gap-16">
           <ActionButton
-            onPress={() => {}}
+            onPress={handleShootingStop}
             className="flex-1"
             size={"md"}
             variant={"assistive"}
@@ -52,7 +102,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
           />
           <ActionButton
             disabled={item?.status === "ready"}
-            onPress={() => {}}
+            onPress={handleShootingEnd}
             className="flex-1"
             size={"md"}
             variant={"primary"}
