@@ -38,7 +38,7 @@ export default function CancelledApplicantCard({ item, project }: CancelledAppli
       <View className="flex flex-row justify-between items-center">
         <ShootingStatusBadge status={item?.status} />
         <Text className="caption1-regular">
-          {getRelativeTime(item.createdAt)}
+          {getRelativeTime(item.updatedAt)}
         </Text>
       </View>
       <View className="flex flex-row justify-between">
@@ -54,7 +54,7 @@ export default function CancelledApplicantCard({ item, project }: CancelledAppli
           취소한 사유
         </Text>
         <Text className="label1-medium text-fg-neutral-solid">
-          응답이 늦거나 연락이 어려웠어요
+          {item?.reason}
         </Text>
       </View>
       <ActionButton
