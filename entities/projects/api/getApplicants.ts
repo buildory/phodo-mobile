@@ -16,6 +16,9 @@ export const getApplicants = async (projectId: number) => {
       started_at,
       ended_at,
       completed_at,
+      reason,
+      share_channel,
+      download_url,
       applicant:profiles (
         id,
         nickname,

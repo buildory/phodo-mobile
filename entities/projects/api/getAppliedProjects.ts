@@ -14,6 +14,7 @@ export const getAppliedProjects = async (
       project:project_id (
         *,
         profiles (
+          id,
           nickname,
           gender
         ),

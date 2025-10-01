@@ -131,6 +131,19 @@ export const ApplicantSchema = z.object({
     .string()
     .optional()
     .openapi({ example: "응답이 늦거나 연락이 어려웠어요" }),
+  reason: z
+    .string()
+    .optional()
+    .openapi({ example: "상대방과 시간이 맞지 않아요" }),
+  shareChannel: z
+    .string()
+    .optional()
+    .openapi({ example: "phodo" }),
+  downloadUrl: z
+    .string()
+    .optional()
+    .openapi({ example: "https://minio.example.com/portfolio-images/shooting_1234567890.zip" }),
+
 });
 
 export const CreateApplicantParamsSchema = ApplicantSchema.omit({
