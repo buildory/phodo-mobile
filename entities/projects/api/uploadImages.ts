@@ -1,5 +1,7 @@
 import * as FileSystem from "expo-file-system";
 import { getSupabaseClient } from "@/shared/lib/supabase";
+import JSZip from "jszip";
+import { uploadToMinio } from "@/shared/api/s3";
 
 const b64ToUint8Array = (b64: string) => {
   const binary = globalThis.atob ? globalThis.atob(b64) : Buffer.from(b64, "base64").toString("binary");
@@ -88,4 +90,59 @@ export const uploadImages = async ({
       }
     })
   );
+};
+
+// ZIP 파일로 압축하여 업로드 (새로운 기능)
+export const uploadImagesAsZip = async (assets: any[]) => {
+  try {
+    // ZIP 파일 생성
+    const zip = new JSZip();
+    
+    // 각 이미지를 ZIP에 추가
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      const ext = asset.uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
+      const fileName = `image_${i + 1}.${ext}`;
+      
+      // 파일을 읽어서 ZIP에 추가
+      const fileData = await FileSystem.readAsStringAsync(asset.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      zip.file(fileName, fileData, { base64: true });
+    }
+    
+    // ZIP 파일 생성
+    const zipContent = await zip.generateAsync({ type: "base64" });
+    
+    // ZIP 파일을 임시 파일로 저장
+    const tempZipPath = `${FileSystem.cacheDirectory}shooting_${Date.now()}.zip`;
+    await FileSystem.writeAsStringAsync(tempZipPath, zipContent, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // ZIP 파일을 MinIO에 업로드
+    const zipFileName = `shooting_${Date.now()}.zip`;
+    const publicUrl = await uploadToMinio({
+      bucket: "portfolio-images",
+      key: zipFileName,
+      uri: tempZipPath,
+      mime: "application/zip",
+    });
+    
+    // 임시 파일 삭제
+    await FileSystem.deleteAsync(tempZipPath, { idempotent: true });
+    
+    return {
+      success: true,
+      files: [publicUrl], // ZIP 파일 하나의 URL만 반환
+      zipFileName,
+    };
+  } catch (error) {
+    console.error("업로드 중 오류:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "알 수 없는 오류",
+    };
+  }
 };
