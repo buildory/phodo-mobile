@@ -5,9 +5,11 @@ import { getRelativeTime } from "@/shared/lib";
 import { useRouter } from "expo-router";
 import { ShootingStatusBadge } from "@/entities/projects/ui";
 import { ShootingPaymentInfo } from "@/entities/projects/ui";
+import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 
 export default function AppliedProjectCard({ project }) {
   const router = useRouter();
+  const { navigateToChat } = useChatRoomOrCreate();
   return (
     <View className="p-16 gap-8 flex flex-col bg-bg-layer-default rounded-16">
       <View className="flex flex-row justify-between items-center">
@@ -32,7 +34,9 @@ export default function AppliedProjectCard({ project }) {
         {(project.status === "ready" ||
           project.status === "shooting" ||
           project.status === "review") && (
+            <Pressable onPress={() => navigateToChat(project.profiles.id)}>
           <Text className="text-fg-neutral-muted">채팅하기</Text>
+            </Pressable>
         )}
       </View>
 
