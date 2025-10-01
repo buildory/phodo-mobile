@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRelativeTime } from "@/shared/lib";
 import ActionButton from "@/shared/ui/ActionButton";
-import ConfirmModal from "@/shared/ui/ConfirmModal";
 import { calculateDistance, getFormattedDistance } from "@/features/projects/lib/geoUtils";
 import {
   ShootingStatusBadge,
@@ -23,16 +21,16 @@ interface ReadyApplicantCardProps {
   item: any;
   project: any;
   myLocation: { latitude: number; longitude: number } | null;
+  onCancelPress?: (item: any) => void;
 }
 
-export default function ReadyApplicantCard({ item, project, myLocation }: ReadyApplicantCardProps) {
+export default function ReadyApplicantCard({ item, project, myLocation, onCancelPress }: ReadyApplicantCardProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { mutate: rejectMatch } = useDeleteApplicant();
   const { mutate: createNotification } = useCreateNotification();
   const { mutate: updateApplicant } = useUpdateApplicant();
   const { navigateToChat } = useChatRoomOrCreate();
-  const [isModalVisible, setModalVisible] = useState(false);
   
   // 실시간 위치 추적
   const { 
@@ -101,9 +99,32 @@ export default function ReadyApplicantCard({ item, project, myLocation }: ReadyA
     return "촬영 장소 근처에 도착하면 촬영 시작 버튼이 활성화돼요.";
   };
 
-  const handleMatchCancel = () => {
-    setModalVisible(true);
+  const openCancelSheet = () => {
+    onCancelPress?.(item);
   };
+
+  const handleShootingStart = () => {
+    updateApplicant(
+      {
+        id: item?.id,
+        values: {
+          status: "shooting",
+          startedAt: new Date(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+        },
+        onError: (error: any) => {
+          console.error("촬영 시작 중 오류:", error);
+          toast.showError("촬영 시작 실패했어요", "잠시 후 다시 시도해주세요.");
+        },
+      }
+    );
+  };
+
 
   return (
     <>
@@ -129,7 +150,7 @@ export default function ReadyApplicantCard({ item, project, myLocation }: ReadyA
         />
         <View className="flex flex-row gap-16">
           <ActionButton
-            onPress={handleMatchCancel}
+            onPress={openCancelSheet}
             className="flex-1"
             size={"md"}
             variant={"assistive"}
@@ -137,7 +158,7 @@ export default function ReadyApplicantCard({ item, project, myLocation }: ReadyA
           />
           <ActionButton
             disabled={!isShootingStartEnabled()}
-            onPress={() => {}}
+            onPress={handleShootingStart}
             className="flex-1"
             size={"md"}
             variant={"primary"}
@@ -146,16 +167,6 @@ export default function ReadyApplicantCard({ item, project, myLocation }: ReadyA
         </View>
         <Text className="caption1-regular text-fg-neutral-muted">{getLocationMessage()}</Text>
       </View>
-
-      <ConfirmModal
-        visible={isModalVisible}
-        title={"촬영을 취소할까요?"}
-        description={"진행 버튼을 누르면 촬영이 취소됩니다."}
-        confirmText="진행"
-        cancelText="취소"
-        onConfirm={() => {}}
-        onCancel={() => setModalVisible(false)}
-      />
     </>
   );
 } 
