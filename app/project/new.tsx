@@ -31,6 +31,7 @@ import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore"
 import { useCreateProject } from "@/entities/projects/model/useCreateProject";
 import { uploadImages } from "@/entities/projects/api/uploadImages";
 import { useToast } from "@/shared/hooks/useToast";
+import { generateRandomId } from "@/shared/lib/uuid";
 const validateTitle = (value: { title: string }) => {
   const errors: Partial<Record<keyof typeof value, string>> = {};
   if (!value.title.trim()) {
@@ -237,6 +238,9 @@ export default function CreateProjectPage() {
     const processedForm = {
       ...form,
       title,
+      state: "WAITING_MATCH",
+      createdAt: new Date(),
+      shootingCode: generateRandomId(),
       availableStartTime: form.availableStartTime?.toTimeString().split(" ")[0],
       availableEndTime: form.availableEndTime?.toTimeString().split(" ")[0],
     };
@@ -259,7 +263,8 @@ export default function CreateProjectPage() {
           resetForm();
           router.back();
         },
-        onError: () => {
+        onError: (error) => {
+          console.error('에러' , error);
           toast.showError("프로젝트 등록에 실패했어요", "잠시 후 다시 시도해주세요.");
         },
       }
