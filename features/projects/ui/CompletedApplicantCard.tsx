@@ -11,6 +11,9 @@ import ActionButton from "@/shared/ui/ActionButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import Feather from '@expo/vector-icons/Feather';
+import { useCountdown } from "@/shared/hooks/useCountdown";
+import { useToast } from "@/shared/hooks/useToast";
+import { UserAvatar } from "@/entities/uesrs/ui";
 interface CompletedApplicantCardProps {
   item: any;
   project: any;
@@ -27,7 +30,8 @@ export default function CompletedApplicantCard({ item, project }: CompletedAppli
           {getRelativeTime(item.createdAt)}
         </Text>
       </View>
-        <View className="flex flex-row justify-between">
+      <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
           <Text>{item?.applicant?.nickname}</Text>
         </View>
         <View className="flex flex-row items-center gap-4">

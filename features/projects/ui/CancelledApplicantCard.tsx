@@ -11,7 +11,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useDeleteApplicant } from "@/entities/projects/model";
 import { useToast } from "@/shared/hooks/useToast";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { UserAvatar } from "@/entities/uesrs/ui";
 interface CancelledApplicantCardProps {
   item: any;
   project: any;
@@ -41,9 +41,10 @@ export default function CancelledApplicantCard({ item, project }: CancelledAppli
           {getRelativeTime(item.updatedAt)}
         </Text>
       </View>
-      <View className="flex flex-row justify-between">
-        <Text>{item?.applicant?.nickname}</Text>
-      </View>
+      <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
+          <Text>{item?.applicant?.nickname}</Text>
+        </View>
       <View className="flex flex-row gap-6">
         <MaterialCommunityIcons
           name="alarm-light-outline"

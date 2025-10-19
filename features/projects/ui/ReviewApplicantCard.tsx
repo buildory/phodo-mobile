@@ -4,7 +4,7 @@ import {
   ShootingStatusBadge,
   ShootingPaymentInfo,
 } from "@/entities/projects/ui";
-import { router } from "expo-router";
+import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import ActionButton from "@/shared/ui/ActionButton";
@@ -29,8 +29,11 @@ export default function ReviewApplicantCard({ item, project }: ReviewApplicantCa
         </Text>
       </View>
         <View className="flex flex-row justify-between">
+      <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.profiles?.applicant} />
           <Text>{item?.applicant?.nickname}</Text>
-          <Pressable onPress={() => navigateToChat(item?.applicant?.id)}> 
+        </View>
+        <Pressable onPress={() => navigateToChat(item?.profiles?.id)}>
             <Text className="label1-regular text-fg-neutral-muted">채팅하기</Text>
           </Pressable>
         </View>

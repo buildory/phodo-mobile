@@ -11,6 +11,7 @@ import { IconSymbol } from "@/shared/ui/IconSymbol";
 import { useUpdateApplicant } from "@/entities/projects/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/shared/hooks/useToast";
+import { UserAvatar } from "@/entities/uesrs/ui";
 
 interface ShootingApplicantCardProps {
   item: any;
@@ -77,7 +78,10 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
         </Text>
       </View>
               <View className="flex flex-row justify-between">
+              <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
           <Text>{item?.applicant?.nickname}</Text>
+        </View>
           <Pressable onPress={() => navigateToChat(item?.applicant?.id)}> 
             <Text className="label1-regular text-fg-neutral-muted">채팅하기</Text>
           </Pressable>

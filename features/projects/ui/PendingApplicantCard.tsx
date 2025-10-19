@@ -16,7 +16,7 @@ import { useCreateNotification } from "@/entities/notification/model";
 import { useToast } from "@/shared/hooks/useToast";
 import { router } from "expo-router";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
-
+import { UserAvatar } from "@/entities/uesrs/ui";
 interface PendingApplicantCardProps {
   item: any;
   project: any;
@@ -93,7 +93,10 @@ export default function PendingApplicantCard({ item, project }: PendingApplicant
           </Text>
         </View>
         <View className="flex flex-row justify-between">
+        <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
           <Text>{item?.applicant?.nickname}</Text>
+        </View>
           <Pressable 
             onPress={() => {
               console.log("버튼 클릭됨:", item?.status, item?.applicant?.id);

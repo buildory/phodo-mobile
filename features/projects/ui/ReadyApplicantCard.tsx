@@ -16,15 +16,14 @@ import { useToast } from "@/shared/hooks/useToast";
 import { router } from "expo-router";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 import { useLocationTracking } from "@/shared/hooks/useLocationTracking";
-
+import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
 interface ReadyApplicantCardProps {
   item: any;
   project: any;
-  myLocation: { latitude: number; longitude: number } | null;
   onCancelPress?: (item: any) => void;
 }
 
-export default function ReadyApplicantCard({ item, project, myLocation, onCancelPress }: ReadyApplicantCardProps) {
+export default function ReadyApplicantCard({ item, project, onCancelPress }: ReadyApplicantCardProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { mutate: rejectMatch } = useDeleteApplicant();
@@ -115,6 +114,12 @@ export default function ReadyApplicantCard({ item, project, myLocation, onCancel
       },
       {
         onSuccess: () => {
+          createNotification({
+            title: "촬영 시작",
+            body: `촬영이 시작되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
           queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
         },
         onError: (error: any) => {
@@ -136,7 +141,10 @@ export default function ReadyApplicantCard({ item, project, myLocation, onCancel
           </Text>
         </View>
         <View className="flex flex-row justify-between">
+        <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
           <Text>{item?.applicant?.nickname}</Text>
+        </View>
           <Pressable 
             onPress={() => {navigateToChat(item?.applicant?.id)}}
           > 
