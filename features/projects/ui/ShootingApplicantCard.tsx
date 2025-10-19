@@ -91,6 +91,27 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
           <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
           <Text className="label1-regular text-fg-info-solid ml-auto">{elapsedTime || '알 수 없음'}</Text>
         </View>
+        <View className="flex flex-row items-center gap-4">
+        <SimpleLineIcons name="present" size={24} color="#1A1C20" />
+        <Text className="label1-regular text-fg-neutral-muted">공유 방법</Text>
+        <View 
+          className="border-stroke-divider-subtle border rounded-8 ml-auto"
+          style={{ 
+            width: 120,
+            height: 50,
+          }}
+        >
+          <Picker
+            selectedValue={shareChannel}
+            onValueChange={(value) => setShareChannel(value)}
+            mode="dropdown"
+          >
+            <Picker.Item style={{ fontSize: 13 }} label="포도쉐어" value="phodo" color="#1A1C20" />
+            <Picker.Item style={{ fontSize: 13 }} label="이메일" value="email" color="#1A1C20" />
+            <Picker.Item style={{ fontSize: 13 }} label="기타매체" value="etc" color="#1A1C20" />
+          </Picker>
+        </View>
+        </View>
       <ShootingPaymentInfo
         isPaid={item?.isPaid}
         pricePerHour={item?.pricePerHour}
