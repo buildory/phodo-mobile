@@ -93,7 +93,7 @@ export const uploadImages = async ({
 };
 
 // ZIP 파일로 압축하여 업로드 (새로운 기능)
-export const uploadImagesAsZip = async (assets: any[]) => {
+export const uploadImagesAsZip = async (assets: any[], shootingCode: string) => {
   try {
     // ZIP 파일 생성
     const zip = new JSZip();
@@ -122,9 +122,9 @@ export const uploadImagesAsZip = async (assets: any[]) => {
     });
     
     // ZIP 파일을 MinIO에 업로드
-    const zipFileName = `shooting_${Date.now()}.zip`;
+    const zipFileName = `${shootingCode}_${Date.now()}.zip`;
     const publicUrl = await uploadToMinio({
-      bucket: "portfolio-images",
+      bucket: "shooting-images",
       key: zipFileName,
       uri: tempZipPath,
       mime: "application/zip",
