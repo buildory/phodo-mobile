@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import { Picker } from "@react-native-picker/picker";
 import { getRelativeTime, getOneWeekLater } from "@/shared/lib";
 import { useElapsedTime } from "@/shared/hooks/useElapsedTime";
 import {
@@ -24,6 +27,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
   const queryClient = useQueryClient();
   const toast = useToast();
   const { mutate: updateApplicant } = useUpdateApplicant();
+  const [shareChannel, setShareChannel] = useState("phodo");
 
   const handleShootingEnd = () => {
     updateApplicant(
@@ -31,6 +35,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
         id: item?.id,
         values: {
           status: "review",
+          shareChannel,
           endedAt: new Date(),
           completedAt: getOneWeekLater(),
           updatedAt: new Date(),
@@ -111,7 +116,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
             <Picker.Item style={{ fontSize: 13 }} label="기타매체" value="etc" color="#1A1C20" />
           </Picker>
         </View>
-        </View>
+      </View>
       <ShootingPaymentInfo
         isPaid={item?.isPaid}
         pricePerHour={item?.pricePerHour}
