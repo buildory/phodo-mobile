@@ -41,11 +41,6 @@ export default function ApplicantScreen() {
     enabled: true
   });
 
-  // myLocation을 ApplicantCard에 맞는 형태로 변환
-  const myLocationForCard = myLocation ? {
-    latitude: myLocation.coords.latitude,
-    longitude: myLocation.coords.longitude
-  } : null;
 
   const pendingApplicants = applicants?.filter(
     (p) =>
@@ -127,7 +122,7 @@ export default function ApplicantScreen() {
                   data={pendingApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} onCancelPress={handleCancelPress} />
+                    <ApplicantCard item={item} project={project} onCancelPress={handleCancelPress} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -156,7 +151,7 @@ export default function ApplicantScreen() {
                   data={inProgressApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} onCancelPress={handleCancelPress} />
+                    <ApplicantCard item={item} project={project} onCancelPress={handleCancelPress} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -185,7 +180,7 @@ export default function ApplicantScreen() {
                   data={doneApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard} onCancelPress={handleCancelPress} />
+                    <ApplicantCard item={item} project={project} onCancelPress={handleCancelPress} />
                   )}
                   contentContainerStyle={{
                     gap: 20,
@@ -214,7 +209,7 @@ export default function ApplicantScreen() {
                   data={canceledApplicants}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
-                    <ApplicantCard item={item} project={project} myLocation={myLocationForCard}/>
+                    <ApplicantCard item={item} project={project} />
                   )}
                   contentContainerStyle={{
                     gap: 20,

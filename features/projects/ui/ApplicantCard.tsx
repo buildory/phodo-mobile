@@ -8,11 +8,10 @@ import ReadyApplicantCard from "./ReadyApplicantCard";
 interface ApplicantCardProps {
   item: any;
   project: any;
-  myLocation: { latitude: number; longitude: number } | null;
   onCancelPress?: (item: any) => void;
 }
 
-export default function ApplicantCard({ item, project, myLocation, onCancelPress }: ApplicantCardProps) {
+export default function ApplicantCard({ item, project, onCancelPress }: ApplicantCardProps) {
   const status = item?.status;
 
   // 상태별로 적절한 컴포넌트 렌더링
@@ -20,7 +19,7 @@ export default function ApplicantCard({ item, project, myLocation, onCancelPress
     case "pending":
       return <PendingApplicantCard item={item} project={project} />;
     case "ready":
-      return <ReadyApplicantCard item={item} project={project} myLocation={myLocation} onCancelPress={onCancelPress} />;
+      return <ReadyApplicantCard item={item} project={project} onCancelPress={onCancelPress} />;
     
     case "shooting":
       return <ShootingApplicantCard item={item} project={project} />;
