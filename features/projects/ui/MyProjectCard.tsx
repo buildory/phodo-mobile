@@ -6,7 +6,7 @@ import { getRelativeTime } from "@/shared/lib";
 import ActionButton from "@/shared/ui/ActionButton";
 import { useRouter } from "expo-router";
 import { ShootingPaymentInfo } from "@/entities/projects/ui";
-
+import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
 export default function MyProjectCard({ project }) {
   const router = useRouter();
   return (
@@ -35,7 +35,10 @@ export default function MyProjectCard({ project }) {
           {project.title || "제목 없음"}
         </Text>
       </Pressable>
-      <Text>{project.profiles.nickname}</Text>
+      <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={project?.profiles?.profileImage} nickname={project?.profiles?.nickname} />
+          <Text>{project?.profiles?.nickname}</Text>
+        </View>
       <View className="flex flex-row items-center gap-6">
         <IconSymbol size={12} name="mappin" color={"#717680"} />
         {project.distance && <Text>{project.distance}</Text>}
