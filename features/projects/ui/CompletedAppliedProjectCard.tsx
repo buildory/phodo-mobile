@@ -96,11 +96,8 @@ export default function CompletedAppliedProjectCard({ item, project }: Completed
       <View className="flex flex-row items-center gap-4">
         <IconSymbol name="camera" size={24} color="#1A1C20" />
         <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
-        <Text className="label1-medium text-fg-neutral-solid">
-          {shootingDuration} {item.startedAt && item.endedAt && "진행"}
-        </Text>
         <Text className="label1-regular text-fg-info-solid ml-auto">
-          {"1시간 30분"}
+          {shootingDuration} {item.startedAt && item.endedAt && "진행"}
         </Text>
       </View>
 
