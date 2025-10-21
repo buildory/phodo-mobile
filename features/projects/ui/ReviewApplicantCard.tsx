@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/shared/hooks/useToast";
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImagesAsZip } from '@/entities/projects/api/uploadImages';
+import { createNotification } from "@/entities/notification/api/createNotification";
 
 const channelMap = {
   phodo: "포도쉐어",
@@ -138,6 +139,12 @@ export default function ReviewApplicantCard({
       },
       {
         onSuccess: () => {
+          createNotification({
+            title: "촬영 완료",
+            body: `촬영이 완료되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
           queryClient.invalidateQueries({
             queryKey: ["applicants", Number(project?.id)],
           });
@@ -170,11 +177,8 @@ export default function ReviewApplicantCard({
       <View className="flex flex-row items-center gap-4">
         <IconSymbol name="camera" size={24} color="#1A1C20" />
         <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
-        <Text className="label1-regular text-fg-neutral-solid">
-          {shootingDuration} {item?.startedAt && item?.endedAt && "진행"}
-        </Text>
         <Text className="label1-regular text-fg-info-solid ml-auto">
-          {"1시간 30분"}
+        {shootingDuration} {item?.startedAt && item?.endedAt && "진행"}
         </Text>
       </View>
       <View className="flex flex-row items-center gap-4">
