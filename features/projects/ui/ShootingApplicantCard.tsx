@@ -15,6 +15,7 @@ import { useUpdateApplicant } from "@/entities/projects/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/shared/hooks/useToast";
 import { UserAvatar } from "@/entities/uesrs/ui";
+import { createNotification } from "@/entities/notification/api/createNotification";
 
 interface ShootingApplicantCardProps {
   item: any;
@@ -43,6 +44,12 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
       },
       {
         onSuccess: () => {
+          createNotification({
+            title: "촬영 종료",
+            body: `촬영이 종료되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
           queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
         },
         onError: (error: any) => {
@@ -64,6 +71,12 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
       },
       {
         onSuccess: () => {
+          createNotification({
+            title: "촬영 중단",
+            body: `촬영이 중단되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
           queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
         },
         onError: (error: any) => {
