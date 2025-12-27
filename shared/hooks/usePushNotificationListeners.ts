@@ -43,7 +43,7 @@ export const usePushNotificationListeners = () => {
               queryKey: ["appliedProjects"],
             });
             queryClient.invalidateQueries({
-              queryKey: ["applicants", data.project_id],
+              queryKey: ["applicants"],
             });
             break;
           case "chat":
