@@ -1,5 +1,4 @@
-import { View, Text } from "react-native";
-import { Pressable } from 'react-native-gesture-handler'
+import { View, Text, Pressable } from "react-native";
 import { copyToClipboard } from "@/shared/lib/clipboard";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
 import {
@@ -43,11 +42,11 @@ export function ProjectCard({
 
   return (
     <View
-      className="flex-1 p-12 gap-8"
+      className="flex-1 gap-8 p-12"
     >
       <View className="flex flex-row items-center">
       <RecruitTypeInfoBadge recruitType={project.recruitType} pinDisplay={project.pinDisplay} />
-        <Text className="caption1-regular text-fg-neutral-subtle ml-auto">
+        <Text className="ml-auto caption1-regular text-fg-neutral-subtle">
           {getRelativeTime(project.createdAt)}
         </Text>
       </View>
@@ -60,7 +59,7 @@ export function ProjectCard({
           {project.title}
         </Text>
       </Pressable>
-      <View className="flex flex-row items-center gap-6">
+      <View className="flex flex-row gap-6 items-center">
         <UserAvatar
           size={24}
           imageUrl={project.profiles.profileImage}
@@ -71,10 +70,10 @@ export function ProjectCard({
         </Text>
       </View>
       <View
-        className="flex flex-row items-center gap-12"
+        className="flex flex-row gap-12 items-center"
       >
-        <View className="flex flex-row gap-4 items-center flex-1">
-          <View className="flex flex-row items-center gap-6">
+        <View className="flex flex-row flex-1 gap-4 items-center">
+          <View className="flex flex-row gap-6 items-center">
             <IconSymbol size={20} name="mappin" color={"#717680"} />
             <Text className="label1-regular text-fg-neutral-muted">
               촬영 장소
@@ -83,7 +82,7 @@ export function ProjectCard({
           <Pressable 
             onPress={() => copyToClipboard(project.locationAddress)}
           >
-            <View className="flex flex-row items-center flex-1 gap-6">
+            <View className="flex flex-row flex-1 gap-6 items-center">
             <Text 
               ellipsizeMode="tail" 
               numberOfLines={1}
@@ -109,10 +108,10 @@ export function ProjectCard({
         pricePerHour={project.pricePerHour}
         requestNote={project.requestNote}
       />
-      <Text className="caption1-medium text-fg-neutral-subtle ml-auto">
-        지원: {project.projectApplicants.length}
+      <Text className="ml-auto caption1-medium text-fg-neutral-subtle">
+        지원: {project?.projectApplicants?.length || 0}
       </Text>
-      <View className="h-1 mt-12 bg-stroke-divider-subtle" />
+      <View className="mt-12 h-1 bg-stroke-divider-subtle" />
     </View>
   );
 }
