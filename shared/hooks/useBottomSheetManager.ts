@@ -7,6 +7,7 @@ export const BOTTOM_SHEET_IDS = {
   USER_PROFILE: 'user-profile-sheet',
   CHAT_ROOM: 'chat-room-sheet',
   NOTIFICATION: 'notification-sheet',
+  CANCEL_REASON: 'cancel-reason-sheet',
 } as const;
 
 export type BottomSheetId = typeof BOTTOM_SHEET_IDS[keyof typeof BOTTOM_SHEET_IDS];

@@ -57,3 +57,82 @@ export const formatDateTime = (
   return dayjs.utc(utcDate).add(9, 'hour').format(format);
 };
 
+/**
+ * 시작 시간부터 현재까지의 경과 시간을 "1시간 30분" 형태로 표시
+ */
+export const getElapsedTime = (startedAt: string | Date): string => {
+  const start = dayjs.utc(startedAt);
+  const now = dayjs.utc();
+  const diff = now.diff(start, 'minute');
+  
+  if (diff < 1) {
+    return '1분';
+  }
+  
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  
+  if (hours === 0) {
+    return `${minutes}분`;
+  }
+  
+  if (minutes === 0) {
+    return `${hours}시간`;
+  }
+  
+  return `${hours}시간 ${minutes}분`;
+};
+
+/**
+ * 시작 시간과 종료 시간 사이의 촬영 진행 시간을 "1시간 30분" 형태로 표시
+ */
+export const getShootingDuration = (startedAt: string | Date | null | undefined, endedAt: string | Date | null | undefined): string => {
+  if (!startedAt || !endedAt) {
+    return '시간 정보 없음';
+  }
+  
+  const start = dayjs.utc(startedAt);
+  const end = dayjs.utc(endedAt);
+  const diff = end.diff(start, 'minute');
+  
+  if (diff < 1) {
+    return '1분';
+  }
+  
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  
+  if (hours === 0) {
+    return `${minutes}분`;
+  }
+  
+  if (minutes === 0) {
+    return `${hours}시간`;
+  }
+  
+  return `${hours}시간 ${minutes}분`;
+};
+
+/**
+ * 현재 시간으로부터 일주일 후의 날짜를 반환
+ */
+export const getOneWeekLater = (): Date => {
+  return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+};
+
+/**
+ * 완료 예정일까지 남은 일수를 계산하여 "n일" 형태로 반환
+ * 해당 날짜의 23:59:59까지를 고려하여 계산
+ */
+export const getDaysUntilCompletion = (completedAt: string | Date | null | undefined): number => {
+  if (!completedAt) {
+    return -1;
+  }
+  
+  const now = dayjs.utc();
+  const completionDate = dayjs.utc(completedAt).endOf('day'); // 해당 날짜의 23:59:59로 설정
+  const diffInDays = completionDate.diff(now, 'day');
+  
+  return diffInDays;
+};
+

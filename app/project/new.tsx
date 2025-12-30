@@ -29,7 +29,9 @@ import { useProjectFormStore } from "@/features/projects/model/useProjectFormSto
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useCurrentUserStore } from "@/entities/uesrs/model/useCurrentUserStore";
 import { useCreateProject } from "@/entities/projects/model/useCreateProject";
+import { uploadImages } from "@/entities/projects/api/uploadImages";
 import { useToast } from "@/shared/hooks/useToast";
+import { generateRandomId } from "@/shared/lib/uuid";
 const validateTitle = (value: { title: string }) => {
   const errors: Partial<Record<keyof typeof value, string>> = {};
   if (!value.title.trim()) {
@@ -236,6 +238,9 @@ export default function CreateProjectPage() {
     const processedForm = {
       ...form,
       title,
+      state: "WAITING_MATCH",
+      createdAt: new Date(),
+      shootingCode: generateRandomId(),
       availableStartTime: form.availableStartTime?.toTimeString().split(" ")[0],
       availableEndTime: form.availableEndTime?.toTimeString().split(" ")[0],
     };
@@ -243,15 +248,24 @@ export default function CreateProjectPage() {
     createProject(
       { form: processedForm, images },
       {
-        onSuccess: () => {
+        onSuccess: async (data: any) => {
+          if (images.length > 0) {
+            const uris = images.map((it: any) =>
+              typeof it === "string" ? it : it?.uri ?? it?.path ?? it?.localUri
+            ).filter(Boolean);
+    
+            try {
+              await uploadImages({ uris, projectId: data.id });
+            } catch (e) {
+              console.error(e);
+            }
+          }
           resetForm();
           router.back();
         },
-        onError: () => {
-          toast.showError(
-            "프로젝트 등록에 실패했어요",
-            "잠시 후 다시 시도해주세요."
-          );
+        onError: (error) => {
+          console.error('에러' , error);
+          toast.showError("프로젝트 등록에 실패했어요", "잠시 후 다시 시도해주세요.");
         },
       }
     );

@@ -1,14 +1,21 @@
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { getRelativeTime } from "@/shared/lib";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import { Picker } from "@react-native-picker/picker";
+import { getRelativeTime, getOneWeekLater } from "@/shared/lib";
+import { useElapsedTime } from "@/shared/hooks/useElapsedTime";
 import {
   ShootingStatusBadge,
   ShootingPaymentInfo,
 } from "@/entities/projects/ui";
-import { router } from "expo-router";
 import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
 import ActionButton from "@/shared/ui/ActionButton";
-import { useState } from "react";
 import { IconSymbol } from "@/shared/ui/IconSymbol";
+import { useUpdateApplicant } from "@/entities/projects/model";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/shared/hooks/useToast";
+import { UserAvatar } from "@/entities/uesrs/ui";
+import { createNotification } from "@/entities/notification/api/createNotification";
 
 interface ShootingApplicantCardProps {
   item: any;
@@ -17,17 +24,82 @@ interface ShootingApplicantCardProps {
 
 export default function ShootingApplicantCard({ item, project }: ShootingApplicantCardProps) {
   const { navigateToChat } = useChatRoomOrCreate();
-  
+  const elapsedTime = useElapsedTime(item?.startedAt);
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const { mutate: updateApplicant } = useUpdateApplicant();
+  const [shareChannel, setShareChannel] = useState("phodo");
+
+  const handleShootingEnd = () => {
+    updateApplicant(
+      {
+        id: item?.id,
+        values: {
+          status: "review",
+          shareChannel,
+          endedAt: new Date(),
+          completedAt: getOneWeekLater(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        onSuccess: () => {
+          createNotification({
+            title: "촬영 종료",
+            body: `촬영이 종료되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
+          queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+        },
+        onError: (error: any) => {
+          console.error("촬영 종료 중 오류:", error);
+          toast.showError("촬영 종료 실패했어요", "잠시 후 다시 시도해주세요.");
+        },
+      }
+    );
+  }
+  const handleShootingStop = () => {
+    updateApplicant(
+      {
+        id: item?.id,
+        values: {
+          status: "ready",
+          startedAt: undefined,
+          updatedAt: new Date(),
+        },
+      },
+      {
+        onSuccess: () => {
+          createNotification({
+            title: "촬영 중단",
+            body: `촬영이 중단되었어요.`,
+            userId: item?.applicant?.id,
+            data: { type: "shooting", userId: item?.applicant?.id },
+          });
+          queryClient.invalidateQueries({ queryKey: ["applicants", Number(project?.id)]});
+        },
+        onError: (error: any) => {
+          console.error("촬영 중단 중 오류:", error);
+          toast.showError("촬영 중단 실패했어요", "잠시 후 다시 시도해주세요.");
+        },
+      }
+    );
+  }
+
   return (
     <View className="flex flex-col gap-8 p-16 bg-bg-layer-default rounded-16">
       <View className="flex flex-row items-center justify-between">
         <ShootingStatusBadge status={item?.status} />
         <Text className="caption1-regular text-fg-neutral-subtle">
-          {getRelativeTime(item.createdAt)}
+          {getRelativeTime(item.updatedAt)}
         </Text>
       </View>
               <View className="flex flex-row justify-between">
+              <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
           <Text>{item?.applicant?.nickname}</Text>
+        </View>
           <Pressable onPress={() => navigateToChat(item?.applicant?.id)}> 
             <Text className="label1-regular text-fg-neutral-muted">채팅하기</Text>
           </Pressable>
@@ -35,8 +107,29 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
         <View className="flex flex-row items-center gap-4">
           <IconSymbol name="camera" size={24} color="#1A1C20" />
           <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
-          <Text className="label1-regular text-fg-info-solid ml-auto">1시간 30분</Text>
+          <Text className="label1-regular text-fg-info-solid ml-auto">{elapsedTime || '알 수 없음'}</Text>
         </View>
+        <View className="flex flex-row items-center gap-4">
+        <SimpleLineIcons name="present" size={24} color="#1A1C20" />
+        <Text className="label1-regular text-fg-neutral-muted">공유 방법</Text>
+        <View 
+          className="border-stroke-divider-subtle border rounded-8 ml-auto"
+          style={{ 
+            width: 120,
+            height: 50,
+          }}
+        >
+          <Picker
+            selectedValue={shareChannel}
+            onValueChange={(value) => setShareChannel(value)}
+            mode="dropdown"
+          >
+            <Picker.Item style={{ fontSize: 13 }} label="포도쉐어" value="phodo" color="#1A1C20" />
+            <Picker.Item style={{ fontSize: 13 }} label="이메일" value="email" color="#1A1C20" />
+            <Picker.Item style={{ fontSize: 13 }} label="기타매체" value="etc" color="#1A1C20" />
+          </Picker>
+        </View>
+      </View>
       <ShootingPaymentInfo
         isPaid={item?.isPaid}
         pricePerHour={item?.pricePerHour}
@@ -44,7 +137,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
       />
         <View className="flex flex-row gap-16">
           <ActionButton
-            onPress={() => {}}
+            onPress={handleShootingStop}
             className="flex-1"
             size={"md"}
             variant={"assistive"}
@@ -52,7 +145,7 @@ export default function ShootingApplicantCard({ item, project }: ShootingApplica
           />
           <ActionButton
             disabled={item?.status === "ready"}
-            onPress={() => {}}
+            onPress={handleShootingEnd}
             className="flex-1"
             size={"md"}
             variant={"primary"}

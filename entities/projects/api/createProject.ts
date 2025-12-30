@@ -1,6 +1,5 @@
 import { getSupabaseClient } from "@/shared/lib/supabase";
 import { toSnake } from "@/shared/lib";
-import { uploadImages } from "./uploadImages";
 
 type CreateProjectParams = {
   form: any;
@@ -42,15 +41,5 @@ export const createProject = async ({ form, images }: CreateProjectParams) => {
   
   if (error) throw error;
 
-  const projectId = data?.id;
-
-  if (!projectId) {
-    throw new Error("프로젝트 등록에 실패했습니다.");
-  }
-
-  if (images.length > 0) {
-    await uploadImages({ uris: images, projectId });
-  }
-
-  return { projectId, result: data };
+  return data;
 };

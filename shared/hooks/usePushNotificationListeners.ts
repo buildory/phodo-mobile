@@ -42,6 +42,9 @@ export const usePushNotificationListeners = () => {
             queryClient.invalidateQueries({
               queryKey: ["appliedProjects"],
             });
+            queryClient.invalidateQueries({
+              queryKey: ["applicants"],
+            });
             break;
           case "chat":
             queryClient.invalidateQueries({

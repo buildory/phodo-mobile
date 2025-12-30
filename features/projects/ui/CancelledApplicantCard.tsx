@@ -11,7 +11,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useDeleteApplicant } from "@/entities/projects/model";
 import { useToast } from "@/shared/hooks/useToast";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { UserAvatar } from "@/entities/uesrs/ui";
 interface CancelledApplicantCardProps {
   item: any;
   project: any;
@@ -38,12 +38,13 @@ export default function CancelledApplicantCard({ item, project }: CancelledAppli
       <View className="flex flex-row justify-between items-center">
         <ShootingStatusBadge status={item?.status} />
         <Text className="caption1-regular">
-          {getRelativeTime(item.createdAt)}
+          {getRelativeTime(item.updatedAt)}
         </Text>
       </View>
-      <View className="flex flex-row justify-between">
-        <Text>{item?.applicant?.nickname}</Text>
-      </View>
+      <View className="flex flex-row items-center gap-6">
+          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.applicant?.nickname} />
+          <Text>{item?.applicant?.nickname}</Text>
+        </View>
       <View className="flex flex-row gap-6">
         <MaterialCommunityIcons
           name="alarm-light-outline"
@@ -54,7 +55,7 @@ export default function CancelledApplicantCard({ item, project }: CancelledAppli
           취소한 사유
         </Text>
         <Text className="label1-medium text-fg-neutral-solid">
-          응답이 늦거나 연락이 어려웠어요
+          {item?.reason}
         </Text>
       </View>
       <ActionButton

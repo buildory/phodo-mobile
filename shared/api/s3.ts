@@ -1,14 +1,40 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import * as FileSystem from "expo-file-system";
+import Constants from 'expo-constants';
 import 'react-native-get-random-values';
 
+const getMinioConfig = () => {
+  if (process.env.EXPO_PUBLIC_MINIO_REGION) {
+    return {
+      region: process.env.EXPO_PUBLIC_MINIO_REGION,
+      endpoint: process.env.EXPO_PUBLIC_MINIO_ENDPOINT,
+      accessKeyId: process.env.EXPO_PUBLIC_MINIO_ACCESS_KEY_ID,
+      secretAccessKey: process.env.EXPO_PUBLIC_MINIO_SECRET_ACCESS_KEY,
+    };
+  }
+
+  const extra = Constants.expoConfig?.extra;
+  if (extra?.minio) {
+    return {
+      region: extra.minio.region,
+      endpoint: extra.minio.endpoint,
+      accessKeyId: extra.minio.accessKeyId,
+      secretAccessKey: extra.minio.secretAccessKey,
+    };
+  }
+  
+  throw new Error('MinIO 설정을 찾을 수 없습니다. 환경 변수 또는 app.json을 확인해주세요.');
+};
+
+const minioConfig = getMinioConfig();
+
 const s3 = new S3Client({
-  region: process.env.EXPO_PUBLIC_MINIO_REGION!,   
-  endpoint: process.env.EXPO_PUBLIC_MINIO_ENDPOINT,
+  region: minioConfig.region,   
+  endpoint: minioConfig.endpoint,
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.EXPO_PUBLIC_MINIO_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.EXPO_PUBLIC_MINIO_SECRET_ACCESS_KEY!,
+    accessKeyId: minioConfig.accessKeyId,
+    secretAccessKey: minioConfig.secretAccessKey,
   },
 });
 
@@ -28,8 +54,7 @@ export async function uploadToMinio({ bucket, key, uri, mime }:{
       ContentType: mime,
     }));
   
-    const endpoint = process.env.EXPO_PUBLIC_MINIO_ENDPOINT;
-    const publicUrl = `${endpoint}/${bucket}/${key}`;
+    const publicUrl = `${minioConfig.endpoint}/${bucket}/${key}`;
     
     return publicUrl;
   }

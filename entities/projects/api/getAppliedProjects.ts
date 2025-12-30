@@ -10,10 +10,11 @@ export const getAppliedProjects = async (
   const { data, error } = await supabase
     .from("project_applicants")
     .select(`
-      status,
+      *,
       project:project_id (
         *,
         profiles (
+          id,
           nickname,
           gender
         ),
@@ -41,6 +42,14 @@ export const getAppliedProjects = async (
     ? data.map((item) => ({
         ...toCamel(item.project),
         status: item.status,
+        id: item.id,
+        projectId: item.project.id,
+        startedAt: item.started_at,
+        endedAt: item.ended_at,
+        completedAt: item.completed_at,
+        reason: item.reason,
+        shareChannel: item.share_channel,
+        downloadUrl: item.download_url,
       }))
     : [];
 };

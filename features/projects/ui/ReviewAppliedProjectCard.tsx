@@ -1,47 +1,39 @@
 import { useState, useEffect } from "react";
-import { View, Text, Pressable, Alert, Platform } from "react-native";
-import { getRelativeTime } from "@/shared/lib";
-import {
-  ShootingStatusBadge,
-  ShootingPaymentInfo,
-} from "@/entities/projects/ui";
-import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
-import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
-import { IconSymbol } from "@/shared/ui/IconSymbol";
-import ActionButton from "@/shared/ui/ActionButton";
+import { View, Text, Pressable, Alert } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { copyToClipboard } from "@/shared/lib/clipboard";
+import { IconSymbol } from "@/shared/ui/IconSymbol";
+import { getRelativeTime, getShootingDuration } from "@/shared/lib";
+import { ShootingStatusBadge } from "@/entities/projects/ui";
+import { ShootingPaymentInfo } from "@/entities/projects/ui";
+import { useChatRoomOrCreate } from "@/entities/chat/model/useChatRoomOrCreate";
+import { UserAvatar } from "@/entities/uesrs/ui/UserAvatar";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import { getShootingDuration, getDaysUntilCompletion } from "@/shared/lib";
+import { uploadImagesAsZip } from '@/entities/projects/api/uploadImages';
 import { useUpdateApplicant } from "@/entities/projects/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/shared/hooks/useToast";
-import * as ImagePicker from 'expo-image-picker';
-import { uploadImagesAsZip } from '@/entities/projects/api/uploadImages';
-import { createNotification } from "@/entities/notification/api/createNotification";
 
 const channelMap = {
   phodo: "포도쉐어",
   email: "이메일",
   etc: "기타매체",
 }
-interface ReviewApplicantCardProps {
+interface ReviewAppliedProjectCardProps {
   item: any;
   project: any;
 }
 
-export default function ReviewApplicantCard({
-  item,
-  project,
-}: ReviewApplicantCardProps) {
-  const { navigateToChat } = useChatRoomOrCreate();
+export default function ReviewAppliedProjectCard({ item, project }: ReviewAppliedProjectCardProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [zipFileName, setZipFileName] = useState<string>("");
+  const { navigateToChat } = useChatRoomOrCreate();
   const queryClient = useQueryClient();
   const toast = useToast();
   const { mutate: updateApplicant } = useUpdateApplicant();
-  const shootingDuration = getShootingDuration(item?.startedAt, item?.endedAt);
-  const daysUntilCompletion = getDaysUntilCompletion(item?.completedAt);
+  const shootingDuration = getShootingDuration(project.startedAt, project.endedAt);
 
   // 기존 downloadUrl이 있으면 상태에 설정
   useEffect(() => {
@@ -53,7 +45,6 @@ export default function ReviewApplicantCard({
       setZipFileName(fileName);
     }
   }, [item?.downloadUrl]);
-
   const handleImageUpload = async () => {
     try {
       // 권한 요청
@@ -127,60 +118,57 @@ export default function ReviewApplicantCard({
     }
   };
 
-  const handleShootingComplete = () => {
-    updateApplicant(
-      {
-        id: item?.id,
-        values: {
-          status: "done",
-          completedAt: new Date(),
-          updatedAt: new Date(),
-        },
-      },
-      {
-        onSuccess: () => {
-          createNotification({
-            title: "촬영 완료",
-            body: `촬영이 완료되었어요.`,
-            userId: item?.applicant?.id,
-            data: { type: "shooting", userId: item?.applicant?.id },
-          });
-          queryClient.invalidateQueries({
-            queryKey: ["applicants", Number(project?.id)],
-          });
-        },
-        onError: (error: any) => {
-          console.error("촬영 완료 중 오류:", error);
-          toast.showError("촬영 완료 실패했어요", "잠시 후 다시 시도해주세요.");
-        },
-      }
-    );
-  };
-
   return (
-    <View className="flex flex-col gap-8 p-16 bg-bg-layer-default rounded-16">
-      <View className="flex flex-row items-center justify-between">
-        <ShootingStatusBadge status={item?.status} />
-        <Text className="caption1-regular text-fg-neutral-subtle">
-          {getRelativeTime(item.updatedAt)}
+    <View className="p-16 gap-8 flex flex-col bg-bg-layer-default rounded-16">
+      <View className="flex flex-row justify-between items-center">
+        <View className="flex flex-row items-center gap-8">
+          <ShootingStatusBadge status={project.status} />
+        </View>
+        <Text className="caption1-regular">
+          {getRelativeTime(project.createdAt)}
         </Text>
       </View>
+      
+      <Pressable>
+        <Text
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          className="headline1-semiBold"
+        >
+          {project.title || "제목 없음"}
+        </Text>
+      </Pressable>
+      
       <View className="flex flex-row justify-between">
       <View className="flex flex-row items-center gap-6">
-          <UserAvatar size={24} imageUrl={item?.applicant?.profileImage} nickname={item?.profiles?.applicant} />
-          <Text>{item?.applicant?.nickname}</Text>
+          <UserAvatar size={24} imageUrl={project?.profiles?.profileImage} nickname={project?.profiles?.nickname} />
+          <Text>{project?.profiles?.nickname}</Text>
         </View>
-        <Pressable onPress={() => navigateToChat(item?.profiles?.id)}>
-          <Text className="label1-regular text-fg-neutral-muted">채팅하기</Text>
+        <Pressable onPress={() => navigateToChat(project.profiles.id)}>
+          <Text className="text-fg-neutral-muted">채팅하기</Text>
         </Pressable>
       </View>
+
+      <View className="flex flex-row items-center gap-6">
+        <IconSymbol size={20} name="mappin" color={"#717680"} />
+        {project.distance && <Text>{project.distance}</Text>}
+        <Pressable
+          onPress={() => copyToClipboard(project.locationAddress)}
+          className="flex flex-row items-center"
+        >
+          <Text className="label1-regular mr-4">{project.inputLocation}</Text>
+          <IconSymbol size={20} name="copy" color="#000" />
+        </Pressable>
+      </View>
+
       <View className="flex flex-row items-center gap-4">
         <IconSymbol name="camera" size={24} color="#1A1C20" />
         <Text className="label1-regular text-fg-neutral-muted">촬영 기록</Text>
         <Text className="label1-regular text-fg-info-solid ml-auto">
-        {shootingDuration} {item?.startedAt && item?.endedAt && "진행"}
+        {shootingDuration} {project.startedAt && project.endedAt && "진행"}
         </Text>
       </View>
+
       <View className="flex flex-row items-center gap-4">
         <SimpleLineIcons name="present" size={24} color="#1A1C20" />
         <Text className="label1-regular text-fg-neutral-muted">공유 방법</Text>
@@ -188,6 +176,7 @@ export default function ReviewApplicantCard({
           {channelMap[item?.shareChannel as keyof typeof channelMap] || item?.shareChannel}
         </Text>
       </View>
+
       {item?.shareChannel === "phodo" && (
         <View className="flex flex-row items-center gap-4">
           <AntDesign name="upload" size={24} color="#1A1C20" />
@@ -218,25 +207,15 @@ export default function ReviewApplicantCard({
           </Pressable>
         </View>
       )}
+
       <ShootingPaymentInfo
-        isPaid={item?.isPaid}
-        pricePerHour={item?.pricePerHour}
-        requestNote={item?.requestNote}
+        isPaid={project?.isPaid}
+        pricePerHour={project?.pricePerHour}
+        requestNote={project?.requestNote}
       />
-      <ActionButton
-        onPress={handleShootingComplete}
-        className="flex-1"
-        size={"md"}
-        variant={"primary"}
-        title={"촬영 완료"}
-      />
-      {daysUntilCompletion >= 0 && (
-        <Text className="caption1-regular text-fg-neutral-muted">
-          {daysUntilCompletion === 0
-            ? "오늘 자동으로 촬영 완료 처리돼요."
-            : daysUntilCompletion + "일 후 자동으로 촬영 완료 처리돼요."}
-        </Text>
-      )}
+
     </View>
   );
 }
+
+

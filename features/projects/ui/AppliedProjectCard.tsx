@@ -1,57 +1,40 @@
-import { View, Text, Pressable } from "react-native";
-import { copyToClipboard } from "@/shared/lib/clipboard";
-import { IconSymbol } from "@/shared/ui/IconSymbol";
-import { getRelativeTime } from "@/shared/lib";
-import { useRouter } from "expo-router";
-import { ShootingStatusBadge } from "@/entities/projects/ui";
-import { ShootingPaymentInfo } from "@/entities/projects/ui";
+import PendingAppliedProjectCard from "./PendingAppliedProjectCard";
+import ReadyAppliedProjectCard from "./ReadyAppliedProjectCard";
+import ShootingAppliedProjectCard from "./ShootingAppliedProjectCard";
+import ReviewAppliedProjectCard from "./ReviewAppliedProjectCard";
+import CompletedAppliedProjectCard from "./CompletedAppliedProjectCard";
+import CancelledAppliedProjectCard from "./CancelledAppliedProjectCard";
 
-export default function AppliedProjectCard({ project }) {
-  const router = useRouter();
-  return (
-    <View className="p-16 gap-8 flex flex-col bg-bg-layer-default rounded-16">
-      <View className="flex flex-row justify-between items-center">
-        <View className="flex flex-row items-center gap-8">
-          <ShootingStatusBadge status={project.status} />
-        </View>
-        <Text className="caption1-regular">
-          {getRelativeTime(project.createdAt)}
-        </Text>
-      </View>
-      <Pressable>
-        <Text
-          numberOfLines={2}
-          ellipsizeMode="tail"
-          className="headline1-semiBold"
-        >
-          {project.title || "제목 없음"}
-        </Text>
-      </Pressable>
-      <View className="flex flex-row justify-between">
-        <Text>{project.profiles.nickname}</Text>
-        {(project.status === "ready" ||
-          project.status === "shooting" ||
-          project.status === "review") && (
-          <Text className="text-fg-neutral-muted">채팅하기</Text>
-        )}
-      </View>
+interface AppliedProjectCardProps {
+  item: any;
+  project: any;
+  onCancelPress?: (item: any) => void;
+}
 
-      <View className="flex flex-row items-center gap-6">
-        <IconSymbol size={20} name="mappin" color={"#717680"} />
-        {project.distance && <Text>{project.distance}</Text>}
-        <Pressable
-          onPress={() => copyToClipboard(project.locationAddress)}
-          className="flex flex-row items-center"
-        >
-          <Text className="label1-regular mr-4">{project.inputLocation}</Text>
-          <IconSymbol size={20} name="copy" color="#000" />
-        </Pressable>
-      </View>
-        <ShootingPaymentInfo
-          isPaid={project?.isPaid}
-          pricePerHour={project?.pricePerHour}
-          requestNote={project?.requestNote}
-        />
-    </View>
-  );
+export default function AppliedProjectCard({ item, project, onCancelPress }: AppliedProjectCardProps) {
+  const status = project?.status;
+
+  // 상태별로 적절한 컴포넌트 렌더링
+  switch (status) {
+    case "pending":
+      return <PendingAppliedProjectCard item={item} project={project} />;
+    
+    case "ready":
+      return <ReadyAppliedProjectCard item={item} project={project} onCancelPress={onCancelPress} />;
+    
+    case "shooting":
+      return <ShootingAppliedProjectCard item={item} project={project} />;
+    
+    case "review":
+      return <ReviewAppliedProjectCard item={item} project={project} />;
+    
+    case "done":
+      return <CompletedAppliedProjectCard item={item} project={project} />;
+    
+    case "cancel":
+      return <CancelledAppliedProjectCard item={item} project={project} />;
+    
+    default:
+      return <PendingAppliedProjectCard item={item} project={project} />;
+  }
 }
