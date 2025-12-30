@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { BackHandler } from 'react-native';
 import 'react-native-reanimated';
+import CodePush from '@bravemobile/react-native-code-push';
 
 import { AuthProvider, useAuth, ToastProvider, QueryProvider, BottomSheetProvider } from '@/shared/providers';
 import { useColorScheme } from 'react-native';
@@ -14,6 +15,8 @@ import { usePushNotificationListeners } from '@/shared/hooks/usePushNotification
 import { useCurrentUser } from '@/entities/uesrs/model';
 import * as Notifications from 'expo-notifications';
 import '@/shared/styles/global.css';
+import { releaseHistoryFetcher } from '@/shared/api/version';
+import { useCheckAppVersion } from '@/shared/hooks/useCheckAppVersion';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,8 +30,8 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function RootLayout() {
 
+function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
@@ -46,6 +49,7 @@ function InnerLayout() {
   const pathname = usePathname();
   useCurrentUser();
   usePushNotificationListeners();
+  useCheckAppVersion();
 
 
   const [fontsLoaded] = useFonts({
@@ -121,3 +125,8 @@ function InnerLayout() {
     </ThemeProvider>
   );
 }
+
+export default CodePush({
+  checkFrequency: CodePush.CheckFrequency.MANUAL,
+  releaseHistoryFetcher: releaseHistoryFetcher,
+})(RootLayout);
